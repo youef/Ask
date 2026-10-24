@@ -201,6 +201,23 @@ input{min-height:55px}
 :root[data-lamma-theme=day]{--bg:#3d5970;--bg2:#668fa1;--acc:#ffdc9a;--card:#fffdf8;--ink:#263747;--mute:#62707a;--line:#e3e9ea}
 .bomb-difficulty{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;color:white}.bomb-difficulty label{font-weight:800}.bomb-difficulty select{font:700 14px Tajawal,Tahoma,sans-serif;max-width:60%;padding:11px;border:1px solid #ffffff55;border-radius:12px;background:#ffffff;color:#292039}
 @media(min-width:850px) and (orientation:landscape){.lamma-game-toolbar{justify-content:center}.lamma-game-toolbar .utility-btn{flex:0 1 190px}}
+
+/* Premium 3D-inspired fortune wheel */
+.wheel-advanced{max-width:780px;margin:0 auto;text-align:center}
+.wheel-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px auto 12px}
+.wheel-mode{border:1px solid #ffffff55;background:#ffffff15;color:#fff;padding:12px 6px;border-radius:14px;font:800 14px Tajawal,Tahoma,sans-serif;cursor:pointer}
+.wheel-mode.active{background:linear-gradient(145deg,#ffe6ac,#e9b960);color:#39254c;border-color:#ffdf91;box-shadow:0 5px 15px #0003}
+.wheel-3d{position:relative;perspective:1000px;padding:16px 0 24px;isolation:isolate}
+.wheel-halo{position:absolute;inset:9% 13%;border-radius:50%;background:radial-gradient(circle,#f9d88144,transparent 70%);filter:blur(26px);pointer-events:none}
+.wheel-advanced .wheel{width:min(76vw,420px);aspect-ratio:1;margin:0 auto;position:relative;filter:drop-shadow(0 18px 14px #0005);transform:rotateX(7deg)}
+.wheel-advanced .wheel:before{content:"";position:absolute;inset:-9px;border:9px solid #b77d38;border-radius:50%;box-shadow:inset 0 0 0 3px #ffe7a4,0 13px 0 #6c4529,0 18px 18px #0007;pointer-events:none}
+.wheel-advanced .wheel canvas{display:block;width:100%;height:100%;border-radius:50%;box-shadow:inset 0 0 20px #0004;will-change:transform}
+.wheel-pointer{position:absolute;top:-27px;left:50%;transform:translateX(-50%);z-index:5;width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:40px solid #ffdc83;filter:drop-shadow(0 4px 2px #0008)}
+.wheel-result{padding:15px 18px;margin:0 0 14px;border:1px solid #f7d88888;border-radius:20px;background:#fff8e9;color:#392641;box-shadow:0 8px 20px #0002;animation:lamma-pop .4s ease both}
+.wheel-result[hidden]{display:none}.wheel-result span{display:block;font-size:13px;color:#775b75}.wheel-result strong{display:block;font-size:clamp(20px,3.5vw,30px);line-height:1.5}
+.wheel-spin-btn{max-width:460px;margin:0 auto}.wheel-footnote{font-size:12px;color:#ffffffb0;margin:12px 0}
+@media(orientation:landscape) and (max-height:600px){.wheel-advanced .wheel{width:min(44vh,300px)}.wheel-3d{padding:5px 0 12px}}
+@media(prefers-reduced-motion:reduce){.wheel-result{animation:none}}
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -343,13 +360,54 @@ cards(g){let d=sh(g.i);const S=P.map(()=>0);
   scr(g.n,`<div class="turn">الدور على: ${esc(who())}</div><div class="panel q"><i>${g.e}</i><div>${q}</div></div>${g.sc?`<div class="two"><button class="btn" id="pt">✔ صح +1</button><button class="btn alt" id="nx">التالي</button></div><p class="count">${P.map((p,i)=>esc(p)+": "+S[i]).join(" | ")}</p>`:`<button class="btn" id="nx">التالي ➜</button>`}`);
   $("#nx").onclick=()=>{turn++;n()};if(g.sc)$("#pt").onclick=()=>{S[turn%P.length]++;fx(40);vib(15);turn++;n()}};
  n()},
-wheel(g){let rot=0;const E=["🎯","🔥","💫","🎉","⚡","💥","🎁","🌀"];
- scr(g.n,`<div class="turn" id="tn">الدور على: ${esc(who())}</div><div class="wheel"><span class="ptr">🔻</span><canvas id="cv" width="300" height="300"></canvas></div><div class="panel q hide" id="q"></div><button class="btn" id="sp">دوّر! 🎡</button>`);
- const x=$("#cv").getContext("2d"),A=acc();
- for(let i=0;i<8;i++){const a=(-90+i*45)*Math.PI/180;x.beginPath();x.moveTo(150,150);x.arc(150,150,148,a,a+Math.PI/4);x.closePath();x.fillStyle=i%2?"rgba(255,255,255,.2)":A;x.fill();x.save();x.translate(150,150);x.rotate(a+Math.PI/8);x.font="30px serif";x.textAlign="center";x.fillText(E[i],100,10);x.restore()}
- $("#sp").onclick=()=>{$("#sp").disabled=true;$("#q").classList.add("hide");const r=Math.random()*8|0;rot=rot-rot%360+1800+360-(r+.5)*45;$("#cv").style.transform=`rotate(${rot}deg)`;
-  const k=setInterval(()=>beep(300+Math.random()*300,.03),180);TM.push(k);
-  TM.push(setTimeout(()=>{clearInterval(k);const q=g.i[Math.random()*g.i.length|0];$("#q").innerHTML=`<i>${E[r]}</i><div>${q}</div>`;$("#q").classList.remove("hide");fx(110);vib([60,40,60]);beep(880,.25);turn++;$("#tn").textContent="الدور على: "+who();$("#sp").disabled=false;$("#sp").textContent="دوّر مرة أخرى 🎡"},4100))}},
+wheel(g){
+ let rotation=0,spinning=false,spins=0;
+ const modes={player:"لاعب",challenge:"تحدّي",penalty:"عقوبة"};
+ const penalties=["قلّد صوت حيوان لمدة 10 ثوانٍ","غنّ مقطعًا قصيرًا","تحدّث بلهجة مختلفة لدقيقة","اذكر 5 أشياء في 10 ثوانٍ","مثّل فيلمًا دون كلام","قل نكتة تضحك المجموعة","اختر لاعبًا يتحداك","تحدث دون حرف الألف لمدة 20 ثانية"];
+ const challenges=Array.isArray(g.i)&&g.i.length?g.i:["اذكر ثلاث مدن","قل معلومة غريبة","تحدّى لاعبًا في سرعة الإجابة"];
+ const palette=["#f6c76c","#7553b6","#e98d9b","#3f9d9b","#edb45e","#6941a4","#df7695","#377d9c"];
+ let items=[],mode="player";
+ const safeNames=()=>lammaPlayerList().slice(0,20);
+ const makeItems=()=>mode==="player"?safeNames():mode==="challenge"?sh(challenges).slice(0,8):penalties.slice();
+ const draw=()=>{
+  const cv=$("#cv");if(!cv)return;
+  const ctx=cv.getContext("2d");const d=480,mid=240,rad=222;cv.width=d;cv.height=d;ctx.clearRect(0,0,d,d);
+  const step=Math.PI*2/items.length;
+  items.forEach((label,i)=>{
+   const a=-Math.PI/2-step/2+i*step;
+   ctx.beginPath();ctx.moveTo(mid,mid);ctx.arc(mid,mid,rad,a,a+step);ctx.closePath();ctx.fillStyle=palette[i%palette.length];ctx.fill();ctx.lineWidth=3;ctx.strokeStyle="#ffffff77";ctx.stroke();
+   ctx.save();ctx.translate(mid,mid);ctx.rotate(-Math.PI/2+i*step);ctx.textAlign="right";ctx.textBaseline="middle";ctx.fillStyle=i%2?"#fff":"#2e2140";ctx.font="bold "+(items.length>12?16:items.length>8?19:23)+"px Tajawal,Arial";
+   let labelText=String(label);if(labelText.length>15)labelText=labelText.slice(0,14)+"…";
+   ctx.fillText(labelText,rad-15,0,rad-58);ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(mid,mid,38,0,Math.PI*2);ctx.fillStyle="#fff4d9";ctx.fill();ctx.lineWidth=8;ctx.strokeStyle="#e8b95d";ctx.stroke();
+  ctx.fillStyle="#52316d";ctx.font="bold 21px Tajawal,Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("لمّة",mid,mid+2);
+ };
+ const change=()=>{
+  items=makeItems();if(items.length<2)items=items.concat(["مفاجأة","أعد المحاولة"]);
+  rotation=0;$("#cv").style.transition="none";$("#cv").style.transform="rotate(0deg)";
+  $("#wheel-result").hidden=true;$("#wheel-hint").textContent=mode==="player"?"العجلة تختار لاعبًا من الأسماء المسجلة":mode==="challenge"?"كل دورة تكشف تحديًا جديدًا":"تحديات مرحة وخفيفة للمجموعة";
+  draw();
+ };
+ scr(g.n,`<div class="wheel-advanced"><div class="turn" id="wheel-hint">اختر نوع العجلة وابدأ!</div><div class="wheel-modes" role="group" aria-label="نوع عجلة الحظ"><button class="wheel-mode active" data-mode="player">اللاعبون</button><button class="wheel-mode" data-mode="challenge">التحديات</button><button class="wheel-mode" data-mode="penalty">العقوبات</button></div><div class="wheel-3d"><div class="wheel-halo"></div><div class="wheel"><div class="wheel-pointer" aria-hidden="true"></div><canvas id="cv" width="480" height="480" role="img" aria-label="عجلة الحظ الدوارة"></canvas></div></div><div class="wheel-result" id="wheel-result" hidden><span id="wheel-result-label">النتيجة</span><strong id="wheel-result-value"></strong></div><button class="btn wheel-spin-btn" id="sp">دوّر العجلة</button><div class="wheel-footnote" id="wheel-footnote">كل دورة تتوقف تدريجيًا عند اختيار عشوائي</div></div>`);
+ const buttons=[...document.querySelectorAll(".wheel-mode")];
+ buttons.forEach(b=>b.onclick=()=>{if(spinning)return;mode=b.dataset.mode;buttons.forEach(x=>x.classList.toggle("active",x===b));change();beep(570,.05)});
+ const spin=()=>{
+  if(spinning)return;spinning=true;$("#sp").disabled=true;$("#wheel-result").hidden=true;$("#sp").textContent="العجلة تدور...";
+  const index=Math.floor(Math.random()*items.length),angle=360/items.length;
+  const current=((rotation%360)+360)%360,target=((360-index*angle)%360+360)%360;
+  const delta=((target-current+360)%360)+360*(5+Math.floor(Math.random()*3));
+  rotation+=delta;const cv=$("#cv");const duration=4700;
+  cv.style.transition="transform "+duration+"ms cubic-bezier(.11,.73,.09,1)";
+  requestAnimationFrame(()=>{cv.style.transform="rotate("+rotation+"deg)"});
+  const tick=setInterval(()=>{if(spinning){beep(430+Math.random()*160,.025);vib(12)}},350);TM.push(tick);
+  const finish=()=>{if(!spinning)return;spinning=false;clearInterval(tick);$("#sp").disabled=false;$("#sp").textContent="دوّر مرة ثانية";$("#wheel-result-label").textContent="نتيجة "+modes[mode];$("#wheel-result-value").textContent=items[index];$("#wheel-result").hidden=false;$("#wheel-hint").textContent="انتهت الدورة "+(++spins);beep(900,.2);vib([80,40,100]);fx(115);
+   if(mode==="challenge"&&items.length>1){const used=items[index];items=items.filter(x=>x!==used);if(items.length<2)items=makeItems()}
+  };
+  const timeout=setTimeout(finish,duration+100);TM.push(timeout);
+ };
+ $("#sp").onclick=spin;change();
+},
 bomb(g){
  let running=false,done=false,end=0,seconds=0,round=0,interval=null;
  const challenges=Array.isArray(g.i)&&g.i.length?g.i:["اذكر ثلاثة أشياء تحبها","قل اسم مدينة تبدأ بحرف م","اذكر خمسة ألوان"];
