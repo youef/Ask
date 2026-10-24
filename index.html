@@ -248,6 +248,12 @@ input{min-height:55px}
 #app>.grid,#app>.panel,#app>.bomb-shell,#app>.wheel-advanced,#app>.extra-stage,#app>.logo{animation:evEnter .55s both}.lamma-overlay .lamma-modal{animation:evEnter .3s both}
 @media(max-width:480px){.ev-toolbar{grid-template-columns:1fr 1fr}.ev-toolbar .utility-btn:last-child{grid-column:span 2}}
 @media(prefers-reduced-motion:reduce){#app>.grid,#app>.panel,#app>.bomb-shell,#app>.wheel-advanced,#app>.extra-stage,#app>.logo,.lamma-overlay .lamma-modal,.ev-gift{animation:none!important}.game{transition:none!important}}
+
+.couples-entry{display:flex;align-items:center;gap:14px;width:100%;text-align:right;background:linear-gradient(125deg,#602d60,#9e527b,#482450);border:1px solid #f5bfd4;color:white;border-radius:23px;padding:18px;margin:16px 0;cursor:pointer;box-shadow:0 12px 30px #0004}.couples-entry>svg{width:29px;height:29px;color:#ffd2e5}.couples-entry span{flex:1}.couples-entry strong{display:block;font-size:20px}.couples-entry small{display:block;color:#ffe0eb}
+.couples-hero{background:radial-gradient(circle at 50% 0%,#b36c9d88,transparent 60%),linear-gradient(145deg,#532b59,#251c3f);border:1px solid #e5a5c8;border-radius:27px;text-align:center;padding:32px 22px;margin:20px 0;box-shadow:0 20px 40px #0004}.couples-heart{display:grid;place-items:center;width:80px;height:80px;border-radius:26px;background:linear-gradient(135deg,#ffe1e8,#d98ba9);color:#5b2b57;margin:0 auto 15px}.couples-heart svg{width:43px;height:43px}.couples-kicker{color:#ffd5e3;font-weight:800}.couples-hero h2{font-size:clamp(26px,5vw,37px);color:#ffe7f0;line-height:1.5;margin:9px 0}.couples-hero p{color:#f6e3f0}
+.couples-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.couples-controls label{font-weight:800}.couples-controls select{display:block;width:100%;margin-top:8px;border-radius:14px;padding:13px;background:#fff7fb;color:#482943;border:1px solid #f4bdd7;font:inherit}.couples-stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.couples-stats span{background:#ffffff18;border:1px solid #ffffff38;border-radius:15px;padding:9px 13px}.couples-actions{display:grid;gap:10px}.couples-note{display:flex;gap:8px;align-items:center;padding:15px;border-radius:15px;background:#ffffff12;margin-top:16px;color:#f6dce8;font-size:13px}.couples-note svg{flex-shrink:0;width:22px}
+.couples-play{max-width:690px;margin:15px auto;text-align:center;padding:clamp(18px,5vw,36px);border:1px solid #e6a3c8;border-radius:28px;background:radial-gradient(circle at 50% 10%,#9c5b8b88,transparent 62%),linear-gradient(145deg,#452344,#211936);box-shadow:0 20px 50px #0005;animation:evEnter .5s both}.couples-round{color:#f8cce1}.couples-category{display:inline-block;background:#ffd6e6;color:#5d2d4b;padding:7px 14px;border-radius:20px;font-weight:800;margin:18px}.couples-question{font-size:clamp(23px,5vw,35px);font-weight:800;line-height:1.8;min-height:160px;display:grid;place-items:center}.couples-play p{color:#f7ddea}.couples-play-buttons{display:grid;gap:9px}.couples-play-buttons .utility-btn{justify-content:center}.couples-home-btn{border:0;background:none;color:#f5c5dc;padding:15px;cursor:pointer}.couples-fav{display:flex;align-items:center;gap:12px;justify-content:space-between;border-bottom:1px solid #eadce7;padding:10px}.couples-fav button{border:0;background:#f9e1e8;color:#692b48;border-radius:9px;padding:6px 12px}
+@media(max-width:380px){.couples-controls{grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){.couples-play{animation:none}}
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/lamma-icon.svg" type="image/svg+xml"><meta name="apple-mobile-web-app-title" content="لمّة"><meta name="mobile-web-app-capable" content="yes"></head>
@@ -423,6 +429,51 @@ function evTools(){return '<div class="ev-toolbar"><button class="utility-btn" d
 function evWire(){document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>{if(b.dataset.ev==="settings")evSettings();if(b.dataset.ev==="surprise")evReward();if(b.dataset.ev==="shop")evThemeShop()});lammaIcons()}
 evApplyTheme();
 
+
+/* Couples-exclusive, opt-in relationship game suite. Subscription validation remains unchanged. */
+const COUPLES_KEY="lamma:couples:v1";
+const COUPLES=(()=>{try{return Object.assign({level:"bold",category:"all",history:[],favorites:[],turn:0},JSON.parse(localStorage.getItem(COUPLES_KEY)||"{}"))}catch(e){return {level:"bold",category:"all",history:[],favorites:[],turn:0}}})();
+function couplesSave(){try{localStorage.setItem(COUPLES_KEY,JSON.stringify(COUPLES))}catch(e){}}
+function couplesAllowed(){return !!(PK&&/متزوج|زوجين|زوجات|أزواج|couple|married/i.test([PK.t,PK.s,META&&META.p].join(" ")))}
+const COUPLES_BANK={
+ romantic:[
+ "ما أكثر تفصيلة في شكلي تلفت انتباهك حتى لو لم ألاحظها؟","ما اللحظة التي شعرت فيها أننا أقرب من أي وقت؟","ما العبارة التي تحب سماعها مني عندما نكون وحدنا؟","ما التصرف الصغير الذي يجعلك تشعر أنك مرغوب ومحبوب؟","لو أعدنا أول موعد لنا، ماذا ستغيّر ليكون أكثر رومانسية؟","متى شعرت أن نظرة واحدة بيننا كانت أبلغ من الكلام؟","أي عطر أو رائحة يذكرك بي فورًا؟","ما نوع المفاجأة الرومانسية التي تتمناها؟","ما أجمل طريقة أحببت أن أعبّر لك بها عن اشتياقي؟","أي مكان في البيت تحب أن نجلس فيه معًا بعيدًا عن الانشغال؟","ما أكثر مجاملة مني تبقى في بالك؟","كيف تتخيل سهرة رومانسية مثالية لنا؟"
+ ],
+ bold:[
+ "ما أكثر شيء جذاب في شخصيتي بالنسبة لك؟","ما نوع المغازلة الذي يجعلك تخجل وتبتسم؟","ما أكثر إطلالة لي أعجبتك؟","ما أجمل ذكرى لنا عندما كنا بمفردنا؟","ما الشيء الذي تتمنى أن أبادر به أكثر في علاقتنا؟","هل تفضل المفاجآت الرومانسية أم التخطيط المسبق؟ ولماذا؟","ما العبارة الجريئة اللطيفة التي تحب أن أقولها لك؟","ما أكثر موقف شعرت فيه بالانجذاب إليّ؟","لو كانت لنا أمسية كاملة بلا أي مقاطعة، كيف تود قضاءها؟","ما الحد الذي تحب أن نتحدث عنه بصراحة أكثر؟","ما نوع الاهتمام الذي يجعلك تشعر بأنك مميز؟","هل تفضل التعبير عن الحب بالكلام أم اللمسات الحنونة أم الأفعال؟"
+ ],
+ deep:[
+ "ما احتياجك العاطفي الذي لم ألتفت إليه بما يكفي؟","متى تشعر بأنني أستمع إليك فعلًا؟","ما الموضوع الذي تتمنى أن نناقشه دون خوف من الحكم؟","كيف يمكن أن أساندك عندما تمر بيوم صعب؟","ما الحد الشخصي الذي تريد أن أحترمه أكثر؟","ما الشيء الذي تحب أن نتوقف عن فعله أثناء الخلاف؟","ما أكبر اختلاف بيننا تحول إلى نقطة قوة؟","كيف تفضل أن أعتذر لك عندما أخطئ؟","ما أمر لم تخبرني به لأنك خشيت أن يساء فهمك؟","ما العادة اليومية التي لو التزمنا بها ستقربنا أكثر؟","ما أجمل تطور حدث في علاقتنا منذ البداية؟","ما حلمنا المشترك الذي نحتاج إلى خطوة عملية نحوه؟"
+ ],
+ memories:[
+ "احكِ أول انطباع أخذته عني بصراحة.","ما أطرف موقف حدث لنا في بداية العلاقة؟","ما أجمل رحلة أو مشوار جمعنا؟","ما الرسالة التي تمنيت لو احتفظت بها للأبد؟","متى ضحكنا معًا حتى دمعت أعيننا؟","ما المناسبة التي تحب أن نعيد الاحتفال بها؟","ما أول هدية تتذكر أنك قدمتها لي؟","ما أغنية أو مكان يذكرك بقصتنا؟"
+ ],
+ dares:[
+ "انظر في عيني شريكك 20 ثانية ثم قل أجمل صفة فيه.","اكتب رسالة غزل من سطرين واقرأها بصوت مسموع.","اختر أغنية وادعُ شريكك لرقصة قصيرة إذا أحب.","قدّم ثلاث مجاملات مختلفة دون تكرار.","صف شريكك بخمس كلمات رومانسية.","امسك يد شريكك لدقيقة إذا وافق.","أعد تمثيل أول لقاء بينكما بطريقتك.","اختر لقبًا لطيفًا جديدًا لشريكك.","خطط لموعد رومانسي مفاجئ خلال الأسبوع.","قل شيئًا تتمنى أن تجربه معه في موعدكما القادم.","اطلب عناقًا دافئًا إذا كان الطرفان مرتاحين.","اكتب وعدًا صغيرًا تستطيع الوفاء به خلال سبعة أيام."
+ ]
+};
+const COUPLES_LABELS={romantic:"رومانسية",bold:"صراحة جريئة",deep:"حديث عميق",memories:"ذكريات",dares:"تحديات لطيفة"};
+function couplesModal(title,body,setup){extraModal(title,body,setup)}
+function couplesHome(){
+ if(!couplesAllowed())return home();clr();
+ app.innerHTML='<div class="top"><button class="link" id="couples-back">‹ الرئيسية</button><h2>باقة المتزوجين</h2>'+lammaTools()+'</div><div class="couples-hero"><div class="couples-heart">'+lammaIcon("heart-handshake")+'</div><div class="couples-kicker">مساحة خاصة للزوجين</div><h2>بيننا كلام ما ينقال لأحد</h2><p>أسئلة رومانسية وصراحة أعمق وتحديات لطيفة، بخيارات تناسب حدودكما وراحتكما.</p></div><div class="couples-controls"><label>مستوى الجرأة<select id="couples-level"><option value="soft">لطيف</option><option value="bold">جريء</option><option value="deep">عميق جدًا</option></select></label><label>نوع التجربة<select id="couples-category"><option value="all">كل الفئات</option><option value="romantic">رومانسية</option><option value="bold">صراحة جريئة</option><option value="deep">حديث عميق</option><option value="memories">ذكريات</option><option value="dares">تحديات</option></select></label></div><div class="couples-stats"><span>'+Object.values(COUPLES_BANK).reduce((a,b)=>a+b.length,0)+' سؤالًا وتحديًا</span><span>'+COUPLES.history.length+' جولة مكتملة</span></div><div class="couples-actions"><button class="btn" id="couples-start">'+lammaIcon("sparkles")+' ابدأ جلسة خاصة</button><button class="btn alt" id="couples-favorites">'+lammaIcon("bookmark")+' المفضلة</button></div><div class="couples-note">'+lammaIcon("shield-check")+' لا تصوير أو مشاركة تلقائية. يمكن تخطي أي سؤال أو تحدٍّ دون عقوبة، وأي تواصل جسدي يتطلب موافقة الطرفين.</div>';
+ $("#couples-back").onclick=home;$("#couples-level").value=COUPLES.level;$("#couples-category").value=COUPLES.category;
+ $("#couples-level").onchange=e=>{COUPLES.level=e.target.value;couplesSave()};$("#couples-category").onchange=e=>{COUPLES.category=e.target.value;couplesSave()};
+ $("#couples-start").onclick=()=>{COUPLES.level=$("#couples-level").value;COUPLES.category=$("#couples-category").value;couplesSave();couplesPlay()};
+ $("#couples-favorites").onclick=()=>couplesFavorites();lammaWireTools();lammaIcons()
+}
+function couplesPool(){
+ const categories=COUPLES.category==="all"?(COUPLES.level==="soft"?["romantic","memories","dares"]:COUPLES.level==="bold"?["romantic","bold","memories","dares"]:Object.keys(COUPLES_BANK)):[COUPLES.category];
+ return categories.flatMap(k=>COUPLES_BANK[k].map(q=>({q,k})))
+}
+function couplesPlay(){
+ if(!couplesAllowed())return home();let pool=sh(couplesPool()),current=null,round=COUPLES.history.length;
+ const show=()=>{if(!pool.length)pool=sh(couplesPool());current=pool.pop();const player=P.length?P[round%P.length]:"أحد الزوجين";scr("جلسة المتزوجين",'<div class="couples-play"><div class="couples-round">الجولة '+(round+1)+' · '+esc(player)+'</div><span class="couples-category">'+esc(COUPLES_LABELS[current.k])+'</span><div class="couples-question">'+esc(current.q)+'</div><p>لك حرية الإجابة أو التخطي دون أي ضغط.</p><div class="couples-play-buttons"><button class="btn" id="couples-next">'+lammaIcon("check")+' تمت الإجابة</button><button class="btn alt" id="couples-skip">'+lammaIcon("skip-forward")+' تخطي</button><button class="utility-btn" id="couples-save">'+lammaIcon("bookmark")+' حفظ</button></div><button class="couples-home-btn" id="couples-end">إنهاء الجلسة</button></div>');$("#couples-next").onclick=()=>advance(true);$("#couples-skip").onclick=()=>advance(false);$("#couples-save").onclick=()=>{if(!COUPLES.favorites.includes(current.q)){COUPLES.favorites.push(current.q);couplesSave()}$("#couples-save").textContent="تم الحفظ"};$("#couples-end").onclick=couplesHome;lammaIcons()};
+ const advance=answered=>{if(answered){COUPLES.history.push({category:current.k,at:Date.now()});if(COUPLES.history.length>250)COUPLES.history.shift();couplesSave();beep(720,.07)}round++;show()};
+ show();
+}
+function couplesFavorites(){if(!couplesAllowed())return;couplesModal("مفضلة الزوجين",'<p>تُحفظ الأسئلة على هذا الجهاز فقط.</p>'+(COUPLES.favorites.length?COUPLES.favorites.map((q,i)=>'<div class="couples-fav"><span>'+esc(q)+'</span><button data-couples-remove="'+i+'" aria-label="حذف">×</button></div>').join(''):'<p>لم تحفظ أي أسئلة بعد.</p>'),el=>el.querySelectorAll("[data-couples-remove]").forEach(b=>b.onclick=()=>{COUPLES.favorites.splice(+b.dataset.couplesRemove,1);couplesSave();couplesFavorites()}))}
+
 const $=s=>document.querySelector(s),app=$("#app");
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -459,8 +510,8 @@ function home(){clr();
  app.innerHTML=`<div class="top"><button class="link" id="out">خروج</button><span class="badge">${dl?"باقي "+dl+" يوم":"اشتراك مفتوح"}</span>${lammaTools()}</div>
  <div class="logo" style="font-size:42px;margin-top:6px">${PK.e} ${PK.t}</div><p class="sub">${PK.s}</p>
  <label class="hint" for="pl">أسماء اللاعبين (افصل بينها بفاصلة)</label><input id="pl" class="pl" value="${esc(P.join("، "))}">
- ${lammaGameTools()}${extraTools()}${evTools()}<div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
- lammaWireTools();lammaWireGameTools();extraWire();evWire();
+ ${couplesAllowed()?`<button class="couples-entry" id="couples-entry"><i data-lucide="heart-handshake"></i><span><strong>باقة المتزوجين الخاصة</strong><small>رومانسية · صراحة جريئة · حوارات عميقة · تحديات</small></span><i data-lucide="chevron-left"></i></button>`:""}${lammaGameTools()}${extraTools()}${evTools()}<div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
+ lammaWireTools();lammaWireGameTools();extraWire();evWire();if(couplesAllowed())$("#couples-entry").onclick=couplesHome;
  $("#out").onclick=()=>{ls.del("code");gate()};
  document.querySelectorAll(".game").forEach(b=>b.onclick=()=>{
   const p=$("#pl").value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);if(p.length)P=p;turn=0;beep(600,.06);
