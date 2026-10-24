@@ -165,6 +165,30 @@ input{min-height:55px}
 @keyframes lamma-pop{from{transform:scale(.3) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
 @media(prefers-reduced-motion:reduce){.celebrate-crown{animation:none}}
 
+
+/* Interactive timed bomb game */
+.bomb-shell{max-width:750px;margin:0 auto}
+.bomb-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;min-height:340px;padding:22px 18px;border:1px solid #ffffff35;border-radius:30px;background:radial-gradient(circle at 50% 45%,#ffbf572e,transparent 55%),linear-gradient(145deg,#28234b,#14102e);box-shadow:inset 0 1px #ffffff25,0 16px 35px #09061d45}
+.bomb-art{position:relative;width:142px;height:155px;display:grid;place-items:end center;animation:bomb-float 1.8s ease-in-out infinite}
+.bomb-body{position:relative;display:grid;place-items:center;width:122px;height:122px;border-radius:50%;background:linear-gradient(145deg,#62627a,#171627 65%);border:5px solid #85829c;box-shadow:inset -12px -14px 16px #0007,0 15px 24px #0006}
+.bomb-body svg{width:65px;height:65px;color:#ffcf71;stroke-width:1.8}
+.bomb-glint{position:absolute;top:15px;right:22px;width:20px;height:9px;border-radius:50%;transform:rotate(-30deg);background:#ffffff45}
+.bomb-fuse{position:absolute;top:3px;left:50%;width:7px;height:34px;background:#d3b18c;transform:rotate(-18deg);border-radius:5px}
+.bomb-spark{position:absolute;top:-5px;left:45%;width:22px;height:22px;background:#ffd060;border-radius:50%;box-shadow:0 0 12px #ff9d2a,0 0 30px #ff6c00;animation:bomb-spark .45s alternate infinite;z-index:2}
+.bomb-status{margin-top:12px;color:#ffce70;font-weight:800;font-size:19px}
+.bomb-count{font:800 42px Tajawal,Tahoma,sans-serif;color:white;line-height:1.1;font-variant-numeric:tabular-nums}
+.bomb-meter{width:min(100%,420px);height:12px;background:#ffffff20;border-radius:20px;overflow:hidden;margin:12px auto}
+.bomb-meter span{display:block;width:100%;height:100%;background:linear-gradient(90deg,#ff914d,#ffdd76);border-radius:20px;transition:width .22s linear}
+.bomb-help{color:#f2eaf3;font-size:13px;text-align:center;margin:5px 0 0}
+.bomb-challenge{display:grid;gap:5px;margin:13px 0;padding:19px;border-radius:20px;background:var(--card);color:var(--ink);text-align:center;min-height:100px;align-content:center}
+.bomb-challenge span{font-size:13px;color:var(--mute)}.bomb-challenge strong{font-size:clamp(18px,2.6vw,25px);line-height:1.5}
+.bomb-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bomb-controls .btn{margin:0}.bomb-stats{margin-top:12px;text-align:center;color:#ffffffb5;font-size:13px}
+.bomb-danger{border-color:#ff5353;background:radial-gradient(circle,#c7353540,transparent 60%),#261124}.bomb-danger .bomb-art{animation:bomb-shake .13s linear infinite}.bomb-danger .bomb-meter span{background:#ff5151}
+.bomb-exploded{background:radial-gradient(circle,#ffb42d55,transparent 70%),#392239}.bomb-exploded .bomb-art{animation:bomb-pop .5s ease-out both}
+@keyframes bomb-float{50%{transform:translateY(-8px)}}@keyframes bomb-spark{to{transform:scale(.65);opacity:.55}}@keyframes bomb-shake{25%{transform:translateX(5px) rotate(3deg)}75%{transform:translateX(-5px) rotate(-3deg)}}@keyframes bomb-pop{50%{transform:scale(1.2)}to{transform:scale(.88);opacity:.5}}
+@media(max-width:420px){.bomb-stage{min-height:310px}.bomb-controls{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:600px){.bomb-stage{min-height:230px}.bomb-art{transform:scale(.7);height:115px}.bomb-help{display:none}}
+@media(prefers-reduced-motion:reduce){.bomb-art,.bomb-spark,.bomb-danger .bomb-art,.bomb-exploded .bomb-art{animation:none}}
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -279,15 +303,60 @@ wheel(g){let rot=0;const E=["🎯","🔥","💫","🎉","⚡","💥","🎁","�
  $("#sp").onclick=()=>{$("#sp").disabled=true;$("#q").classList.add("hide");const r=Math.random()*8|0;rot=rot-rot%360+1800+360-(r+.5)*45;$("#cv").style.transform=`rotate(${rot}deg)`;
   const k=setInterval(()=>beep(300+Math.random()*300,.03),180);TM.push(k);
   TM.push(setTimeout(()=>{clearInterval(k);const q=g.i[Math.random()*g.i.length|0];$("#q").innerHTML=`<i>${E[r]}</i><div>${q}</div>`;$("#q").classList.remove("hide");fx(110);vib([60,40,60]);beep(880,.25);turn++;$("#tn").textContent="الدور على: "+who();$("#sp").disabled=false;$("#sp").textContent="دوّر مرة أخرى 🎡"},4100))}},
-bomb(g){let on=0;
- scr(g.n,`<div class="turn" id="tn">اضغط ابدأ ومرّروا الجوال بسرعة!</div><div class="panel q" id="q"><div class="bomb" id="bm">💣</div></div><button class="btn" id="st">ابدأ 💣</button>`);
- const st=$("#st");
- const boom=()=>{on=0;const q=g.i[Math.random()*g.i.length|0];beep(110,.5);vib([200,80,200]);fx(170);
-  $("#q").innerHTML=`<i>💥</i><div><b>انفجرت عند ${esc(who())}!</b><br>${q}</div>`;st.textContent="جولة جديدة 💣";turn++;$("#tn").textContent=""};
- st.onclick=()=>{if(!on){on=1;const end=Date.now()+(7+Math.random()*13)*1000;$("#tn").textContent="الجوال مع: "+who();st.textContent="مرّرت ✋";
-   $("#q").innerHTML=`<div class="bomb tick">💣</div>`;
-   const k=setInterval(()=>{beep(520,.05);vib(15);if(Date.now()>=end){clearInterval(k);boom()}},550);TM.push(k)}
-  else{turn++;$("#tn").textContent="الجوال مع: "+who();vib(10)}}},
+bomb(g){
+ let running=false,done=false,end=0,seconds=0,round=0,interval=null;
+ const challenges=Array.isArray(g.i)&&g.i.length?g.i:["اذكر ثلاثة أشياء تحبها","قل اسم مدينة تبدأ بحرف م","اذكر خمسة ألوان"];
+ let queue=sh(challenges);
+ const nextChallenge=()=>{if(!queue.length)queue=sh(challenges);return queue.pop()};
+ const art='<div class="bomb-art" id="bomb-art" aria-hidden="true"><div class="bomb-spark"></div><div class="bomb-fuse"></div><div class="bomb-body"><i data-lucide="bomb"></i><span class="bomb-glint"></span></div></div>';
+ const render=()=>{
+  scr(g.n,`<div class="bomb-shell"><div class="turn" id="tn">القنبلة المؤقتة · تحدّي السرعة</div><div class="bomb-stage" id="bomb-stage">${art}<div class="bomb-status" id="bomb-status">جاهزين للتحدّي؟</div><div class="bomb-count" id="bomb-count">؟</div><div class="bomb-meter"><span id="bomb-meter"></span></div><p class="bomb-help" id="bomb-help">أجب عن التحدّي ومرّر الجهاز قبل الانفجار!</p></div><div class="bomb-challenge" id="bomb-challenge"><span>التحدّي</span><strong id="bomb-question">اضغط ابدأ لكشف أول تحدّي</strong></div><div class="bomb-controls"><button class="btn" id="st">ابدأ الجولة</button><button class="btn alt" id="bomb-skip" disabled>تحدّي آخر</button></div><div class="bomb-stats" id="bomb-stats">الجولة ${round+1} · المدة عشوائية · من 12 إلى 22 ثانية</div></div>`);
+  $("#st").onclick=action;$("#bomb-skip").onclick=()=>{if(!running)return;$("#bomb-question").textContent=nextChallenge();beep(660,.06);vib(25)};
+  lammaIcons();
+ };
+ const update=()=>{
+  if(!running)return;
+  const remain=Math.max(0,end-performance.now()),pct=Math.max(0,remain/(seconds*1000)*100);
+  $("#bomb-meter").style.width=pct+"%";
+  $("#bomb-stage").classList.toggle("bomb-danger",pct<28);
+  $("#bomb-count").textContent=Math.ceil(remain/1000);
+  if(remain<=0){explode();return}
+ };
+ const explode=()=>{
+  if(!running)return;
+  running=false;done=true;clearInterval(interval);interval=null;
+  $("#bomb-stage").classList.remove("bomb-danger");$("#bomb-stage").classList.add("bomb-exploded");
+  $("#bomb-count").textContent="!";
+  $("#bomb-status").textContent="انفجرت القنبلة!";
+  $("#bomb-help").textContent="انتهى الوقت! استعدوا للجولة التالية.";
+  $("#bomb-question").textContent="انفجرت عند "+who()+"! "+nextChallenge();
+  $("#tn").textContent="نهاية الجولة "+(round+1);
+  $("#st").textContent="جولة جديدة";$("#bomb-skip").disabled=true;
+  beep(130,.4);vib([160,80,160]);fx(140);round++;turn++;
+ };
+ const action=()=>{
+  if(!running){
+   running=true;done=false;seconds=12+Math.floor(Math.random()*11);end=performance.now()+seconds*1000;
+   $("#bomb-stage").classList.remove("bomb-exploded","bomb-danger");
+   $("#bomb-status").textContent="القنبلة تعمل!";
+   $("#bomb-question").textContent=nextChallenge();
+   $("#bomb-help").textContent="جاوب بسرعة ثم اضغط «مرّر»!";
+   $("#st").textContent="مرّر إلى التالي";$("#bomb-skip").disabled=false;
+   $("#tn").textContent="القنبلة مع: "+who();
+   $("#bomb-stats").textContent="الجولة "+(round+1)+" · الوقت بدأ!";
+   $("#bomb-count").textContent=seconds;$("#bomb-meter").style.width="100%";
+   beep(820,.12);vib(40);
+   interval=setInterval(()=>{update();if(running&&Math.ceil(Math.max(0,end-performance.now())/1000)<=5)beep(630,.035)},220);
+   TM.push(interval);update();
+  }else{
+   turn++;$("#tn").textContent="القنبلة مع: "+who();
+   $("#bomb-question").textContent=nextChallenge();
+   $("#bomb-status").textContent="لا توقفون!";
+   beep(760,.07);vib(35);update();
+  }
+ };
+ render();
+},
 timer(g){let d=sh(g.i);
  const n=()=>{if(!d.length)d=sh(g.i);const c=d.pop();
   scr(g.n,`<div class="turn">الدور على: ${esc(who())}</div><div class="panel q"><i>⏱️</i><div>اذكر أكبر عدد من:<br><b>${c}</b></div><div class="big" id="cd">30</div></div><div class="bar"><i id="br" style="width:100%"></i></div><button class="btn" id="go">ابدأ العدّ</button>`);
