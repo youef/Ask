@@ -227,6 +227,10 @@ input{min-height:55px}
 .extra-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.extra-choices .btn{padding:12px 5px}.extra-guess{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}.extra-guess select{width:110px;padding:10px;border-radius:10px}
 .extra-word{font-size:clamp(32px,7vw,58px);font-weight:800;color:#ffe1a0;margin:25px 0}.extra-clock{font-size:46px;font-weight:800}
 @media(min-width:800px){.extra-tools{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bomb-powers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.bomb-powers .utility-btn{justify-content:center;font-size:13px;min-height:42px}.bomb-powers .utility-btn:disabled{opacity:.45}
+.lamma-tv .wrap{--content-max:1450px}.lamma-tv .game{min-height:175px}.lamma-tv .bomb-shell{max-width:1050px}.lamma-tv .wheel-advanced{max-width:1000px}.lamma-tv .wheel-advanced .wheel{width:min(65vh,520px)}
+@media(min-width:1000px){.lamma-tv .grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(prefers-reduced-motion:no-preference){.game,.utility-btn,.btn{transition:transform .2s ease,box-shadow .2s ease}.game:active,.utility-btn:active,.btn:active{transform:scale(.97)}}
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -361,8 +365,10 @@ function extraSession(){
  });
 }
 function extraFinish(){EXTRA.session=null;extraSave();const winner=extraNames().slice().sort((a,b)=>(lammaState.scores[b]||0)-(lammaState.scores[a]||0))[0];lammaCelebrate(winner)}
-function extraTools(){return '<div class="extra-tools"><button class="utility-btn" data-extra="session">'+lammaIcon("play-circle")+' وضع الحفلة</button><button class="utility-btn" data-extra="who">'+lammaIcon("heart-handshake")+' مين يعرف الثاني؟</button><button class="utility-btn" data-extra="charades">'+lammaIcon("message-circle-question")+' خمن الكلمة</button><button class="utility-btn" data-extra="profiles">'+lammaIcon("contact")+' اللاعبون</button><button class="utility-btn" data-extra="badges">'+lammaIcon("medal")+' الإنجازات</button><button class="utility-btn" data-extra="editor">'+lammaIcon("notebook-pen")+' تحدياتي</button><button class="utility-btn" data-extra="sounds">'+lammaIcon("music-2")+' الأصوات</button></div>'}
-function extraWire(){document.querySelectorAll("[data-extra]").forEach(b=>b.onclick=()=>{const k=b.dataset.extra;if(k==="session")extraSession();else if(k==="who")extraWho();else if(k==="charades")extraCharades();else if(k==="profiles")extraProfiles();else if(k==="badges")extraBadges();else if(k==="editor")extraEditor();else if(k==="sounds")extraSounds()});lammaIcons()}
+function extraTV(){document.body.classList.toggle("lamma-tv");const enabled=document.body.classList.contains("lamma-tv");try{localStorage.setItem("lamma:tv",enabled?"1":"0")}catch(e){}if(document.fullscreenEnabled&&enabled)document.documentElement.requestFullscreen().catch(()=>{});else if(!enabled&&document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
+try{if(localStorage.getItem("lamma:tv")==="1")document.body.classList.add("lamma-tv")}catch(e){}
+function extraTools(){return '<div class="extra-tools"><button class="utility-btn" data-extra="session">'+lammaIcon("play-circle")+' وضع الحفلة</button><button class="utility-btn" data-extra="who">'+lammaIcon("heart-handshake")+' مين يعرف الثاني؟</button><button class="utility-btn" data-extra="charades">'+lammaIcon("message-circle-question")+' خمن الكلمة</button><button class="utility-btn" data-extra="profiles">'+lammaIcon("contact")+' اللاعبون</button><button class="utility-btn" data-extra="badges">'+lammaIcon("medal")+' الإنجازات</button><button class="utility-btn" data-extra="editor">'+lammaIcon("notebook-pen")+' تحدياتي</button><button class="utility-btn" data-extra="sounds">'+lammaIcon("music-2")+' الأصوات</button><button class="utility-btn" data-extra="tv">شاشة كبيرة</button></div>'}
+function extraWire(){document.querySelectorAll("[data-extra]").forEach(b=>b.onclick=()=>{const k=b.dataset.extra;if(k==="session")extraSession();else if(k==="who")extraWho();else if(k==="charades")extraCharades();else if(k==="profiles")extraProfiles();else if(k==="badges")extraBadges();else if(k==="editor")extraEditor();else if(k==="sounds")extraSounds();else if(k==="tv")extraTV()});lammaIcons()}
 
 const $=s=>document.querySelector(s),app=$("#app");
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -468,14 +474,18 @@ wheel(g){
  $("#sp").onclick=spin;change();
 },
 bomb(g){
- let running=false,done=false,end=0,seconds=0,round=0,interval=null;
+ let running=false,done=false,end=0,seconds=0,round=0,interval=null,shield=false,reverse=false;
  const challenges=Array.isArray(g.i)&&g.i.length?g.i:["اذكر ثلاثة أشياء تحبها","قل اسم مدينة تبدأ بحرف م","اذكر خمسة ألوان"];
  let queue=sh(challenges);
  const nextChallenge=()=>{if(!queue.length)queue=sh(challenges);return queue.pop()};
  const art='<div class="bomb-art" id="bomb-art" aria-hidden="true"><div class="bomb-spark"></div><div class="bomb-fuse"></div><div class="bomb-body"><i data-lucide="bomb"></i><span class="bomb-glint"></span></div></div>';
  const render=()=>{
-  scr(g.n,`<div class="bomb-shell"><div class="turn" id="tn">القنبلة المؤقتة · تحدّي السرعة</div><div class="bomb-stage" id="bomb-stage">${art}<div class="bomb-status" id="bomb-status">جاهزين للتحدّي؟</div><div class="bomb-count" id="bomb-count">؟</div><div class="bomb-meter"><span id="bomb-meter"></span></div><p class="bomb-help" id="bomb-help">أجب عن التحدّي ومرّر الجهاز قبل الانفجار!</p></div><div class="bomb-challenge" id="bomb-challenge"><span>التحدّي</span><strong id="bomb-question">اضغط ابدأ لكشف أول تحدّي</strong></div><div class="bomb-difficulty"><label for="bomb-level">مستوى القنبلة</label><select id="bomb-level"><option value="random">مفاجأة عشوائية</option><option value="easy">سهل · 30 ثانية</option><option value="medium">متوسط · 20 ثانية</option><option value="hard">صعب · 10 ثوانٍ</option></select></div><div class="bomb-controls"><button class="btn" id="st">ابدأ الجولة</button><button class="btn alt" id="bomb-skip" disabled>تحدّي آخر</button></div><div class="bomb-stats" id="bomb-stats">الجولة ${round+1} · المدة عشوائية · من 12 إلى 22 ثانية</div></div>`);
-  $("#bomb-level").value=lammaState.difficulty;$("#bomb-level").onchange=e=>{lammaState.difficulty=e.target.value;lammaSave()};$("#st").onclick=action;$("#bomb-skip").onclick=()=>{if(!running)return;$("#bomb-question").textContent=nextChallenge();beep(660,.06);vib(25)};
+  scr(g.n,`<div class="bomb-shell"><div class="turn" id="tn">القنبلة المؤقتة · تحدّي السرعة</div><div class="bomb-stage" id="bomb-stage">${art}<div class="bomb-status" id="bomb-status">جاهزين للتحدّي؟</div><div class="bomb-count" id="bomb-count">؟</div><div class="bomb-meter"><span id="bomb-meter"></span></div><p class="bomb-help" id="bomb-help">أجب عن التحدّي ومرّر الجهاز قبل الانفجار!</p></div><div class="bomb-challenge" id="bomb-challenge"><span>التحدّي</span><strong id="bomb-question">اضغط ابدأ لكشف أول تحدّي</strong></div><div class="bomb-difficulty"><label for="bomb-level">مستوى القنبلة</label><select id="bomb-level"><option value="random">مفاجأة عشوائية</option><option value="easy">سهل · 30 ثانية</option><option value="medium">متوسط · 20 ثانية</option><option value="hard">صعب · 10 ثوانٍ</option></select></div><div class="bomb-powers"><button class="utility-btn" id="bomb-shield">درع النجاة</button><button class="utility-btn" id="bomb-bonus">+5 ثوانٍ</button><button class="utility-btn" id="bomb-reverse">عكس الاتجاه</button><button class="utility-btn" id="bomb-double">تحدّي مزدوج</button></div><div class="bomb-controls"><button class="btn" id="st">ابدأ الجولة</button><button class="btn alt" id="bomb-skip" disabled>تحدّي آخر</button></div><div class="bomb-stats" id="bomb-stats">الجولة ${round+1} · المدة عشوائية · من 12 إلى 22 ثانية</div></div>`);
+  $("#bomb-level").value=lammaState.difficulty;$("#bomb-level").onchange=e=>{lammaState.difficulty=e.target.value;lammaSave()};$("#bomb-shield").onclick=()=>{if(!running||shield)return;shield=true;$("#bomb-shield").disabled=true;$("#bomb-status").textContent="درع النجاة مفعّل!";beep(780,.1)};
+  $("#bomb-bonus").onclick=()=>{if(!running)return;end+=5000;seconds+=5;$("#bomb-bonus").disabled=true;$("#bomb-status").textContent="وقت إضافي +5 ثوانٍ";beep(850,.12)};
+  $("#bomb-reverse").onclick=()=>{if(!running)return;reverse=!reverse;$("#bomb-status").textContent=reverse?"انعكس اتجاه التمرير!":"عاد اتجاه التمرير";vib(70)};
+  $("#bomb-double").onclick=()=>{if(!running)return;$("#bomb-question").textContent=nextChallenge()+" + "+nextChallenge();$("#bomb-status").textContent="تحدّي مزدوج!";beep(680,.1)};
+  $("#st").onclick=action;$("#bomb-skip").onclick=()=>{if(!running)return;$("#bomb-question").textContent=nextChallenge();beep(660,.06);vib(25)};
   lammaIcons();
  };
  const update=()=>{
@@ -493,14 +503,14 @@ bomb(g){
   $("#bomb-count").textContent="!";
   $("#bomb-status").textContent="انفجرت القنبلة!";
   $("#bomb-help").textContent="انتهى الوقت! استعدوا للجولة التالية.";
-  const loser=who();lammaRecordLoss(loser);$("#bomb-question").textContent="انفجرت عند "+loser+"! "+nextChallenge();
+  const loser=who();if(!shield)lammaRecordLoss(loser);else extraAward(loser);$("#bomb-question").textContent=(shield?"نجا بالدرع: ":"انفجرت عند ")+loser+"! "+nextChallenge();
   $("#tn").textContent="نهاية الجولة "+(round+1);
-  $("#st").textContent="جولة جديدة";$("#bomb-skip").disabled=true;$("#bomb-level").disabled=false;
+  $("#st").textContent="جولة جديدة";$("#bomb-skip").disabled=true;$("#bomb-level").disabled=false;$("#bomb-shield").disabled=false;$("#bomb-bonus").disabled=false;
   beep(130,.4);vib([160,80,160]);fx(140);round++;turn++;
  };
  const action=()=>{
   if(!running){
-   running=true;done=false;seconds=lammaDifficulty();end=performance.now()+seconds*1000;
+   running=true;done=false;shield=false;reverse=false;seconds=lammaDifficulty();end=performance.now()+seconds*1000;
    $("#bomb-stage").classList.remove("bomb-exploded","bomb-danger");
    $("#bomb-status").textContent="القنبلة تعمل!";
    $("#bomb-question").textContent=nextChallenge();
@@ -513,7 +523,7 @@ bomb(g){
    interval=setInterval(()=>{update();if(running&&Math.ceil(Math.max(0,end-performance.now())/1000)<=5)beep(630,.035)},220);
    TM.push(interval);update();
   }else{
-   turn++;$("#tn").textContent="القنبلة مع: "+who();
+   turn+=reverse?-1:1;if(turn<0)turn+=P.length;$("#tn").textContent="القنبلة مع: "+who();
    $("#bomb-question").textContent=nextChallenge();
    $("#bomb-status").textContent="لا توقفون!";
    beep(760,.07);vib(35);update();
