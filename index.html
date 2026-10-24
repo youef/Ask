@@ -140,6 +140,31 @@ input{min-height:55px}
 @media(max-width:359px){.grid{gap:8px}.game{padding:12px;min-height:148px}.game b{font-size:16px}.welcome-panel{padding:17px}}
 @media(prefers-contrast:more){.game,.panel,.badge{border-width:2px}.sub,.hint,.game small{opacity:1}}
 
+
+/* Settings and celebration */
+.utility-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.utility-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid #ffffff42;border-radius:13px;background:#ffffff14;color:#fff;padding:9px 12px;font:700 14px Tajawal,Tahoma,sans-serif;cursor:pointer}
+.utility-btn svg{width:17px;height:17px}
+.utility-btn:focus-visible,.setting-switch:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.lamma-overlay{position:fixed;inset:0;z-index:100;background:#08061bc9;backdrop-filter:blur(14px);display:grid;place-items:center;padding:18px}
+.lamma-modal{position:relative;width:min(100%,480px);max-height:calc(100dvh - 36px);overflow-y:auto;border-radius:27px;background:#fbf8f4;color:#2b1a28;padding:26px;box-shadow:0 24px 80px #0009;text-align:right}
+.lamma-modal h2{font:800 27px Tajawal,Tahoma,sans-serif;margin:0 0 6px}
+.lamma-modal p{color:#6d6472;margin:0 0 20px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-bottom:1px solid #e6d9d0}
+.setting-row strong,.setting-row small{display:block}
+.setting-row small{color:#7a6a76;font-size:12px}
+.setting-switch{border:0;border-radius:40px;padding:8px 14px;min-width:70px;background:#ddd4da;color:#342d35;font:800 14px Tajawal,Tahoma,sans-serif;cursor:pointer}
+.setting-switch[aria-checked="true"]{background:#18765b;color:white}
+.lamma-close{position:absolute;top:15px;left:15px;border:0;background:#f0e8e4;border-radius:12px;width:37px;height:37px;cursor:pointer}
+.lamma-close svg{width:18px;height:18px;vertical-align:middle}
+.celebrate-modal{text-align:center;background:radial-gradient(circle at 50% 0%,#fff2d6,#fbf8f4 68%)}
+.celebrate-crown{display:grid;place-items:center;width:100px;height:100px;margin:18px auto;border-radius:30px;background:linear-gradient(140deg,#ffdf85,#f2b84b);color:#51351b;animation:lamma-pop .65s cubic-bezier(.2,1.7,.4,1) both}
+.celebrate-crown svg{width:55px;height:55px}
+.celebrate-modal h2{font-size:34px}
+.celebrate-modal .btn{margin-top:16px}
+@keyframes lamma-pop{from{transform:scale(.3) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+@media(prefers-reduced-motion:reduce){.celebrate-crown{animation:none}}
+
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -161,6 +186,37 @@ async function unlock(code){
  return{err:"الكود غير صحيح، تأكد من كتابته."}
 }
 //--END
+
+const LAMMA_SETTINGS_KEY="lamma:preferences:v1";
+const lammaPrefs=(()=>{try{return Object.assign({sound:true,vibration:true,celebration:true},JSON.parse(localStorage.getItem(LAMMA_SETTINGS_KEY)||"{}"))}catch(e){return {sound:true,vibration:true,celebration:true}}})();
+function saveLammaPrefs(){try{localStorage.setItem(LAMMA_SETTINGS_KEY,JSON.stringify(lammaPrefs))}catch(e){}}
+function lammaIcon(name){return '<i data-lucide="'+name+'" aria-hidden="true"></i>'}
+function lammaIcons(){if(window.lucide)window.lucide.createIcons()}
+function lammaClose(){document.querySelector(".lamma-overlay")?.remove()}
+function lammaSettings(){
+ lammaClose();
+ const overlay=document.createElement("div");overlay.className="lamma-overlay";overlay.setAttribute("role","presentation");
+ overlay.innerHTML='<section class="lamma-modal" role="dialog" aria-modal="true" aria-label="إعدادات اللعبة"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><h2>إعدادات اللمّة</h2><p>خلّ أجواء اللعب على مزاجكم</p>'+[
+ ["sound","volume-2","الأصوات","مؤثرات اللعب والتنبيهات"],
+ ["vibration","smartphone","الاهتزاز","اهتزاز الجهاز عند التفاعل"],
+ ["celebration","party-popper","الاحتفالات","مؤثرات الكونفيتي عند الفوز"]
+ ].map(([k,ic,title,desc])=>'<div class="setting-row"><div><strong>'+lammaIcon(ic)+' '+title+'</strong><small>'+desc+'</small></div><button class="setting-switch" data-pref="'+k+'" role="switch" aria-checked="'+!!lammaPrefs[k]+'">'+(lammaPrefs[k]?"مفعّل":"متوقف")+'</button></div>').join('')+'<button class="btn" id="settings-done">تم</button></section>';
+ document.body.appendChild(overlay);overlay.querySelector(".lamma-close").onclick=lammaClose;overlay.querySelector("#settings-done").onclick=lammaClose;
+ overlay.addEventListener("click",e=>{if(e.target===overlay)lammaClose()});
+ overlay.querySelectorAll("[data-pref]").forEach(b=>b.onclick=()=>{const k=b.dataset.pref;lammaPrefs[k]=!lammaPrefs[k];saveLammaPrefs();b.setAttribute("aria-checked",String(lammaPrefs[k]));b.textContent=lammaPrefs[k]?"مفعّل":"متوقف";if(k==="sound"&&lammaPrefs[k])beep(700,.08);if(k==="vibration"&&lammaPrefs[k])vib(40)});
+ lammaIcons();
+}
+function lammaCelebrate(){
+ lammaClose();
+ const overlay=document.createElement("div");overlay.className="lamma-overlay";
+ overlay.innerHTML='<section class="lamma-modal celebrate-modal" role="dialog" aria-modal="true" aria-label="شاشة الاحتفال"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><div class="celebrate-crown">'+lammaIcon("trophy")+'</div><h2>يا سلام عليكم!</h2><p>أجواء اللمّة تستاهل الاحتفال! 🎉</p><button class="btn" id="celebrate-again">'+lammaIcon("party-popper")+' احتفلوا مرة ثانية</button><button class="btn" id="celebrate-done" style="background:#eee4e0;color:#2b1a28">العودة للعبة</button></section>';
+ document.body.appendChild(overlay);overlay.querySelector(".lamma-close").onclick=lammaClose;overlay.querySelector("#celebrate-done").onclick=lammaClose;overlay.querySelector("#celebrate-again").onclick=lammaParty;
+ overlay.addEventListener("click",e=>{if(e.target===overlay)lammaClose()});lammaIcons();lammaParty();
+}
+function lammaParty(){if(lammaPrefs.celebration)fx(220);beep(880,.18);vib([80,40,80])}
+function lammaTools(){return '<div class="utility-actions"><button class="utility-btn" data-lamma-settings>'+lammaIcon("settings-2")+' الإعدادات</button><button class="utility-btn" data-lamma-celebrate>'+lammaIcon("trophy")+' احتفال</button></div>'}
+function lammaWireTools(){document.querySelectorAll("[data-lamma-settings]").forEach(b=>b.onclick=lammaSettings);document.querySelectorAll("[data-lamma-celebrate]").forEach(b=>b.onclick=lammaCelebrate);lammaIcons()}
+
 const $=s=>document.querySelector(s),app=$("#app");
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -169,10 +225,10 @@ const clr=()=>{TM.forEach(t=>{clearTimeout(t);clearInterval(t)});TM=[]};
 const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const who=()=>P[turn%P.length];
 const acc=()=>getComputedStyle(document.documentElement).getPropertyValue("--acc").trim();
-const fx=(n=120)=>{window.confetti&&confetti({particleCount:n,spread:90,origin:{y:.65},colors:[acc(),"#ffffff","#ff6b9d","#6bd3ff"]})};
-const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
-const beep=(f,d=.08)=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
-const scr=(t,b)=>{clr();app.innerHTML=`<div class="top"><button class="link" id="bk">‹ رجوع</button><h2>${t}</h2><span style="width:60px"></span></div>${b}`;$("#bk").onclick=home};
+const fx=(n=120)=>{if(!lammaPrefs.celebration)return;window.confetti&&confetti({particleCount:n,spread:90,origin:{y:.65},colors:[acc(),"#ffffff","#ff6b9d","#6bd3ff"]})};
+const vib=p=>{if(!lammaPrefs.vibration)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const beep=(f,d=.08)=>{if(!lammaPrefs.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
+const scr=(t,b)=>{clr();app.innerHTML=`<div class="top"><button class="link" id="bk">‹ رجوع</button><h2>${t}</h2>${lammaTools()}</div>${b}`;$("#bk").onclick=home;lammaWireTools()};
 
 function gate(msg){clr();document.documentElement.removeAttribute("style");
  app.innerHTML=`<div class="welcome-hero"><div class="welcome-mark"><i data-lucide="sparkles" aria-hidden="true"></i></div><div class="welcome-kicker">ألعاب تجمعنا</div><div class="logo">لمّة</div><p class="sub">الضحكة أحلى مع اللمّة — جهّز أصحابك وابدأ التحدي</p><div class="welcome-pills"><span><i data-lucide="users-round"></i> جمعة الأصحاب</span><span><i data-lucide="party-popper"></i> تحديات ممتعة</span></div></div>
@@ -194,11 +250,11 @@ function enter(r,quiet){PK=r.pkg;META=r.meta;P=PK.pl.slice();const s=document.do
  s.setProperty("--bg",PK.th[0]);s.setProperty("--bg2",PK.th[1]);s.setProperty("--acc",PK.th[2]);home();if(!quiet)fx(180)}
 function home(){clr();
  const dl=META.e?Math.ceil((Date.parse(META.e+"T23:59:59")-Date.now())/864e5):0;
- app.innerHTML=`<div class="top"><button class="link" id="out">خروج</button><span class="badge">${dl?"باقي "+dl+" يوم":"اشتراك مفتوح"}</span></div>
+ app.innerHTML=`<div class="top"><button class="link" id="out">خروج</button><span class="badge">${dl?"باقي "+dl+" يوم":"اشتراك مفتوح"}</span>${lammaTools()}</div>
  <div class="logo" style="font-size:42px;margin-top:6px">${PK.e} ${PK.t}</div><p class="sub">${PK.s}</p>
  <label class="hint" for="pl">أسماء اللاعبين (افصل بينها بفاصلة)</label><input id="pl" class="pl" value="${esc(P.join("، "))}">
  <div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
- if(window.lucide)window.lucide.createIcons({attrs:{"stroke-width":2.1}});
+ lammaWireTools();
  $("#out").onclick=()=>{ls.del("code");gate()};
  document.querySelectorAll(".game").forEach(b=>b.onclick=()=>{
   const p=$("#pl").value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);if(p.length)P=p;turn=0;beep(600,.06);
