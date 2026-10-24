@@ -1,0 +1,21 @@
+{
+  "name": "لمّة – ألعاب وتحديات جماعية",
+  "short_name": "لمّة",
+  "description": "ألعاب جماعية وتحديات وفعاليات اللمّة",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1d1b3a",
+  "theme_color": "#2c204b",
+  "icons": [
+    {
+      "src": "./icons/lamma-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
