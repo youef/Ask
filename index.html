@@ -218,6 +218,15 @@ input{min-height:55px}
 .wheel-spin-btn{max-width:460px;margin:0 auto}.wheel-footnote{font-size:12px;color:#ffffffb0;margin:12px 0}
 @media(orientation:landscape) and (max-height:600px){.wheel-advanced .wheel{width:min(44vh,300px)}.wheel-3d{padding:5px 0 12px}}
 @media(prefers-reduced-motion:reduce){.wheel-result{animation:none}}
+
+.extra-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}.extra-tools .utility-btn{min-height:48px;justify-content:center;text-align:center;white-space:normal}
+.extra-modal textarea,.extra-modal select{width:100%;padding:12px;border-radius:12px;border:1px solid #d8cbd4;background:#fff;color:#35263a;font:inherit}
+.extra-profile{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px;border-bottom:1px solid #eadfe8}.extra-profile small{color:#786b7a}.extra-profile input[type=color]{width:36px;height:36px;border:0;background:transparent}
+.extra-avatar{display:grid;place-items:center;width:43px;height:43px;border-radius:50%;color:#342039}.extra-avatar svg{width:24px;height:24px}
+.extra-stage{max-width:680px;margin:16px auto;padding:clamp(16px,4vw,35px);background:linear-gradient(145deg,#332653,#19152f);border:1px solid #ffffff40;border-radius:25px;color:white;text-align:center;box-shadow:0 15px 40px #0004}.extra-stage h2{line-height:1.5}.extra-stage p{color:#e7dce9}
+.extra-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.extra-choices .btn{padding:12px 5px}.extra-guess{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}.extra-guess select{width:110px;padding:10px;border-radius:10px}
+.extra-word{font-size:clamp(32px,7vw,58px);font-weight:800;color:#ffe1a0;margin:25px 0}.extra-clock{font-size:46px;font-weight:800}
+@media(min-width:800px){.extra-tools{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -283,7 +292,7 @@ function lammaLeaderboard(){
  lammaClose();const el=document.createElement("div");el.className="lamma-overlay";
  el.innerHTML='<section class="lamma-modal" role="dialog" aria-modal="true" aria-label="لوحة البطولة"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><h2>بطولة اللمّة</h2><p>نقاط اللاعبين ونتائج التحديات</p><div class="lamma-board">'+people.map((p,i)=>'<div class="lamma-board-row"><b>'+(i+1)+'. '+esc(p.name)+'</b><span>'+p.score+' نقطة · '+p.loss+' خسارة</span><button data-award="'+i+'" class="setting-switch">+ نقطة</button></div>').join('')+'</div><button class="btn" id="lamma-share">مشاركة النتائج</button><button class="btn" id="lamma-winner">تتويج الفائز</button><button class="btn alt" id="lamma-reset" style="color:#38243a;border-color:#c8b7be">تصفير البطولة</button></section>';
  document.body.appendChild(el);el.querySelector(".lamma-close").onclick=lammaClose;el.addEventListener("click",e=>{if(e.target===el)lammaClose()});
- el.querySelectorAll("[data-award]").forEach(b=>b.onclick=()=>{const p=people[+b.dataset.award];lammaState.scores[p.name]=(lammaState.scores[p.name]||0)+1;lammaSave();lammaLeaderboard()});
+ el.querySelectorAll("[data-award]").forEach(b=>b.onclick=()=>{const p=people[+b.dataset.award];extraAward(p.name);lammaLeaderboard()});
  el.querySelector("#lamma-reset").onclick=()=>{if(confirm("تصفير نقاط وخسائر البطولة؟")){lammaState.scores={};lammaState.losses={};lammaState.rounds=0;lammaSave();lammaLeaderboard()}};
  el.querySelector("#lamma-winner").onclick=()=>{const winner=people[0];lammaClose();lammaCelebrate(winner.name)};
  el.querySelector("#lamma-share").onclick=async()=>{const msg="نتائج بطولة لمّة 🏆\n"+people.map((p,i)=>(i+1)+". "+p.name+" — "+p.score+" نقطة، "+p.loss+" خسارة").join("\n");try{if(navigator.share)await navigator.share({title:"بطولة لمّة",text:msg});else if(navigator.clipboard){await navigator.clipboard.writeText(msg);alert("تم نسخ النتائج")}else prompt("انسخ النتائج",msg)}catch(e){}};
@@ -305,6 +314,56 @@ function lammaDifficulty(){return lammaState.difficulty==="easy"?30:lammaState.d
 function lammaGameTools(){return '<div class="lamma-game-toolbar"><button class="utility-btn" data-lamma-board>'+lammaIcon("trophy")+' البطولة</button><button class="utility-btn" data-lamma-picker>'+lammaIcon("shuffle")+' اختيار لاعب</button><button class="utility-btn" data-lamma-appearance>'+lammaIcon("palette")+' المظهر</button></div>'}
 function lammaWireGameTools(){document.querySelectorAll("[data-lamma-board]").forEach(b=>b.onclick=lammaLeaderboard);document.querySelectorAll("[data-lamma-picker]").forEach(b=>b.onclick=lammaPicker);document.querySelectorAll("[data-lamma-appearance]").forEach(b=>b.onclick=lammaAppearance);lammaIcons()}
 
+
+const PARTY_STORE="lamma:extras:v1";
+const EXTRA=(()=>{try{return Object.assign({custom:[],profiles:{},badges:{},session:null,sound:"classic"},JSON.parse(localStorage.getItem(PARTY_STORE)||"{}"))}catch(e){return {custom:[],profiles:{},badges:{},session:null,sound:"classic"}}})();
+const extraSave=()=>{try{localStorage.setItem(PARTY_STORE,JSON.stringify(EXTRA))}catch(e){}};
+const extraNames=()=>{const el=document.querySelector("#pl");if(el){const a=el.value.split(/[,،]/).map(x=>x.trim()).filter(Boolean);if(a.length)P=a}return P.length?P:["لاعب 1","لاعب 2"]};
+const extraWords=["قهوة","طائرة","سيارة","نخلة","بحر","مطار","مدرسة","مفتاح","كاميرا","حديقة","طبيب","كرة قدم","هاتف","شمس","مظلة","مكتبة"];
+const extraQuestions=["أيهما تفضل: السفر أم الجلسة بالبيت؟","ما لونك المفضل؟","هل تحب المفاجآت؟","ما أكلك المفضل؟","ما أفضل فصل عندك؟","هل تفضل البحر أم البر؟","ما وجهتك المفضلة؟","هل تفضل الصباح أم الليل؟"];
+function extraAward(name,n=1){lammaState.scores[name]=(lammaState.scores[name]||0)+n;lammaSave();EXTRA.badges[name]??=[];if(lammaState.scores[name]>=1&&!EXTRA.badges[name].includes("أول فوز"))EXTRA.badges[name].push("أول فوز");if(lammaState.scores[name]>=5&&!EXTRA.badges[name].includes("نجم اللمّة"))EXTRA.badges[name].push("نجم اللمّة");extraSave()}
+function extraModal(title,body,bind){
+ lammaClose();const el=document.createElement("div");el.className="lamma-overlay";
+ el.innerHTML='<section class="lamma-modal extra-modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><h2>'+esc(title)+'</h2>'+body+'</section>';
+ document.body.appendChild(el);el.querySelector(".lamma-close").onclick=lammaClose;el.onclick=e=>{if(e.target===el)lammaClose()};if(bind)bind(el);lammaIcons();
+}
+function extraProfiles(){
+ const names=extraNames(),icons=["user-round","star","heart","crown","smile","zap"];
+ extraModal("ملفات اللاعبين",'<p>اختر صورة رمزية ولونًا لكل لاعب.</p>'+names.map((n,i)=>{const p=EXTRA.profiles[n]||{icon:0,color:"#e3b96b"};return '<div class="extra-profile"><span class="extra-avatar" style="background:'+p.color+'">'+lammaIcon(icons[p.icon])+'</span><strong>'+esc(n)+'</strong><small>'+((lammaState.scores[n]||0))+' نقطة</small><input type="color" data-color="'+i+'" value="'+p.color+'"><button class="setting-switch" data-avatar="'+i+'">الرمز</button></div>'}).join('')+'<button class="btn" id="extra-badges">الإنجازات</button>',el=>{
+ el.querySelectorAll("[data-color]").forEach(b=>b.oninput=()=>{const n=names[+b.dataset.color];EXTRA.profiles[n]??={icon:0,color:"#e3b96b"};EXTRA.profiles[n].color=b.value;extraSave();el.querySelectorAll(".extra-avatar")[+b.dataset.color].style.background=b.value});
+ el.querySelectorAll("[data-avatar]").forEach(b=>b.onclick=()=>{const n=names[+b.dataset.avatar];EXTRA.profiles[n]??={icon:0,color:"#e3b96b"};EXTRA.profiles[n].icon=(EXTRA.profiles[n].icon+1)%icons.length;extraSave();extraProfiles()});
+ el.querySelector("#extra-badges").onclick=extraBadges;
+ });
+}
+function extraBadges(){extraModal("إنجازات اللاعبين",'<p>شارات تُكتسب مع نقاط البطولة.</p>'+extraNames().map(n=>'<div class="extra-profile"><strong>'+esc(n)+'</strong><span>'+((EXTRA.badges[n]||[]).join(" · ")||"لا توجد شارات بعد")+'</span></div>').join('')+'<button class="btn" id="extra-back">ملفات اللاعبين</button>',el=>el.querySelector("#extra-back").onclick=extraProfiles)}
+function extraEditor(){
+ extraModal("محرر التحديات",'<p>أضف تحدياتك الخاصة (حتى 100 تحدٍّ).</p><textarea id="extra-text" maxlength="180" placeholder="اكتب تحديًا جديدًا"></textarea><button class="btn" id="extra-add">إضافة</button>'+EXTRA.custom.map((q,i)=>'<div class="extra-profile"><span>'+esc(q)+'</span><button class="setting-switch" data-delete="'+i+'">حذف</button></div>').join(''),el=>{
+ el.querySelector("#extra-add").onclick=()=>{const v=el.querySelector("#extra-text").value.trim();if(v&&EXTRA.custom.length<100){EXTRA.custom.push(v);extraSave();extraEditor()}};
+ el.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{EXTRA.custom.splice(+b.dataset.delete,1);extraSave();extraEditor()});
+ });
+}
+function extraSounds(){extraModal("مكتبة الأصوات",'<p>اختر نوع النغمة، أو عطّل الصوت من الإعدادات.</p>'+[["classic","كلاسيكي"],["arcade","أركيد"],["soft","هادئ"]].map(([id,n])=>'<button class="btn" data-sound="'+id+'">'+(EXTRA.sound===id?"✓ ":"")+n+'</button>').join(''),el=>el.querySelectorAll("[data-sound]").forEach(b=>b.onclick=()=>{EXTRA.sound=b.dataset.sound;extraSave();beep(740,.1);extraSounds()}))}
+function extraWho(){
+ const names=extraNames();let index=0;
+ const ask=()=>{const owner=names[index%names.length],q=extraQuestions[index%extraQuestions.length];scr("مين يعرف الثاني أكثر؟",'<div class="extra-stage"><h2>'+esc(q)+'</h2><p>صاحب السؤال: '+esc(owner)+' — اختر إجابتك سرًا، ثم مرّر الجهاز للآخرين.</p><div class="extra-choices">'+["أ","ب","ج"].map(x=>'<button class="btn" data-answer="'+x+'">الخيار '+x+'</button>').join('')+'</div><div id="extra-answers"></div></div>');document.querySelectorAll("[data-answer]").forEach(b=>b.onclick=()=>{const answer=b.dataset.answer;document.querySelectorAll("[data-answer]").forEach(x=>x.disabled=true);const others=names.filter(x=>x!==owner);$("#extra-answers").innerHTML='<p>ليتوقع كل لاعب الإجابة.</p>'+others.map((n,i)=>'<label class="extra-guess">'+esc(n)+'<select data-guess="'+i+'"><option value="">اختر</option><option>أ</option><option>ب</option><option>ج</option></select></label>').join('')+'<button class="btn" id="extra-reveal">كشف الإجابة</button>';$("#extra-reveal").onclick=()=>{let wins=[];document.querySelectorAll("[data-guess]").forEach(x=>{if(x.value===answer){const n=others[+x.dataset.guess];wins.push(n);extraAward(n)}});$("#extra-answers").innerHTML='<h2>الإجابة: '+answer+'</h2><p>'+(wins.length?"أصاب: "+wins.map(esc).join("، "):"لم يصب أحد")+'</p><button class="btn" id="extra-next">التالي</button>';fx(80);$("#extra-next").onclick=()=>{index++;ask()}}})};ask();
+}
+function extraCharades(){
+ const names=extraNames();let queue=sh(extraWords.concat(EXTRA.custom)),score=0,seconds=60,timer;
+ scr("خمن الكلمة",'<div class="extra-stage"><h2>اشرح دون نطق الكلمة</h2><div class="extra-word" id="extra-word">جاهز؟</div><div class="extra-clock" id="extra-clock">60</div><p id="extra-score">النقاط: 0</p><div class="two"><button class="btn" id="extra-correct" disabled>صح +1</button><button class="btn alt" id="extra-skip" disabled>تخطي</button></div><button class="btn" id="extra-start">ابدأ</button></div>');
+ const next=()=>{if(!queue.length)queue=sh(extraWords.concat(EXTRA.custom));$("#extra-word").textContent=queue.pop()};
+ $("#extra-start").onclick=()=>{$("#extra-start").disabled=true;$("#extra-correct").disabled=false;$("#extra-skip").disabled=false;next();timer=setInterval(()=>{seconds--;$("#extra-clock").textContent=seconds;if(seconds<=5&&seconds>0)beep(600,.04);if(seconds<=0){clearInterval(timer);$("#extra-word").textContent="انتهى الوقت";$("#extra-correct").disabled=true;$("#extra-skip").disabled=true;extraAward(who(),score);$("#extra-score").textContent=who()+" حصل على "+score+" نقطة";$("#extra-start").disabled=false;$("#extra-start").textContent="جولة جديدة";$("#extra-start").onclick=()=>{turn++;extraCharades()};fx(100)}},1000);TM.push(timer)};
+ $("#extra-correct").onclick=()=>{score++;$("#extra-score").textContent="النقاط: "+score;beep(800,.08);next()};$("#extra-skip").onclick=next;
+}
+function extraSession(){
+ extraModal("وضع الحفلة",'<p>جولات متتابعة تجمع النقاط عبر الألعاب.</p><p>'+(EXTRA.session?"الجولة "+(EXTRA.session.index+1)+" من "+EXTRA.session.max:"ابدأ جلسة جديدة")+'</p><select id="extra-rounds"><option value="5">5 جولات</option><option value="10">10 جولات</option><option value="15">15 جولة</option></select><button class="btn" id="extra-next-game">'+(EXTRA.session?"الجولة التالية":"ابدأ الحفلة")+'</button><button class="btn alt" id="extra-finish">إنهاء وتتويج الفائز</button>',el=>{
+ el.querySelector("#extra-next-game").onclick=()=>{if(!EXTRA.session)EXTRA.session={index:0,max:+el.querySelector("#extra-rounds").value};else EXTRA.session.index++;if(EXTRA.session.index>=EXTRA.session.max){extraFinish();return}extraSave();lammaClose();const mode=EXTRA.session.index%4;if(mode===0)extraWho();else if(mode===1)extraCharades();else {const key=mode===2?"wheel":"bomb",g=PK.g.find(x=>x.k===key);if(g)RUN[key](g);else extraWho()}};
+ el.querySelector("#extra-finish").onclick=extraFinish;
+ });
+}
+function extraFinish(){EXTRA.session=null;extraSave();const winner=extraNames().slice().sort((a,b)=>(lammaState.scores[b]||0)-(lammaState.scores[a]||0))[0];lammaCelebrate(winner)}
+function extraTools(){return '<div class="extra-tools"><button class="utility-btn" data-extra="session">'+lammaIcon("play-circle")+' وضع الحفلة</button><button class="utility-btn" data-extra="who">'+lammaIcon("heart-handshake")+' مين يعرف الثاني؟</button><button class="utility-btn" data-extra="charades">'+lammaIcon("message-circle-question")+' خمن الكلمة</button><button class="utility-btn" data-extra="profiles">'+lammaIcon("contact")+' اللاعبون</button><button class="utility-btn" data-extra="badges">'+lammaIcon("medal")+' الإنجازات</button><button class="utility-btn" data-extra="editor">'+lammaIcon("notebook-pen")+' تحدياتي</button><button class="utility-btn" data-extra="sounds">'+lammaIcon("music-2")+' الأصوات</button></div>'}
+function extraWire(){document.querySelectorAll("[data-extra]").forEach(b=>b.onclick=()=>{const k=b.dataset.extra;if(k==="session")extraSession();else if(k==="who")extraWho();else if(k==="charades")extraCharades();else if(k==="profiles")extraProfiles();else if(k==="badges")extraBadges();else if(k==="editor")extraEditor();else if(k==="sounds")extraSounds()});lammaIcons()}
+
 const $=s=>document.querySelector(s),app=$("#app");
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -315,8 +374,8 @@ const who=()=>P[turn%P.length];
 const acc=()=>getComputedStyle(document.documentElement).getPropertyValue("--acc").trim();
 const fx=(n=120)=>{if(!lammaPrefs.celebration)return;window.confetti&&confetti({particleCount:n,spread:90,origin:{y:.65},colors:[acc(),"#ffffff","#ff6b9d","#6bd3ff"]})};
 const vib=p=>{if(!lammaPrefs.vibration)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
-const beep=(f,d=.08)=>{if(!lammaPrefs.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
-const scr=(t,b)=>{clr();app.innerHTML=`<div class="top"><button class="link" id="bk">‹ رجوع</button><h2>${t}</h2>${lammaTools()}</div>${lammaGameTools()}${b}`;$("#bk").onclick=home;lammaWireTools();lammaWireGameTools()};
+const beep=(f,d=.08)=>{if(!lammaPrefs.sound)return;f=EXTRA.sound==="arcade"?f*1.3:EXTRA.sound==="soft"?f*.7:f;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
+const scr=(t,b)=>{clr();app.innerHTML=`<div class="top"><button class="link" id="bk">‹ رجوع</button><h2>${t}</h2>${lammaTools()}</div>${lammaGameTools()}${extraTools()}${b}`;$("#bk").onclick=home;lammaWireTools();lammaWireGameTools();extraWire()};
 
 function gate(msg){clr();document.documentElement.removeAttribute("style");
  app.innerHTML=`<div class="welcome-hero"><div class="welcome-mark"><i data-lucide="sparkles" aria-hidden="true"></i></div><div class="welcome-kicker">ألعاب تجمعنا</div><div class="logo">لمّة</div><p class="sub">الضحكة أحلى مع اللمّة — جهّز أصحابك وابدأ التحدي</p><div class="welcome-pills"><span><i data-lucide="users-round"></i> جمعة الأصحاب</span><span><i data-lucide="party-popper"></i> تحديات ممتعة</span></div></div>
@@ -341,8 +400,8 @@ function home(){clr();
  app.innerHTML=`<div class="top"><button class="link" id="out">خروج</button><span class="badge">${dl?"باقي "+dl+" يوم":"اشتراك مفتوح"}</span>${lammaTools()}</div>
  <div class="logo" style="font-size:42px;margin-top:6px">${PK.e} ${PK.t}</div><p class="sub">${PK.s}</p>
  <label class="hint" for="pl">أسماء اللاعبين (افصل بينها بفاصلة)</label><input id="pl" class="pl" value="${esc(P.join("، "))}">
- ${lammaGameTools()}<div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
- lammaWireTools();lammaWireGameTools();
+ ${lammaGameTools()}${extraTools()}<div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
+ lammaWireTools();lammaWireGameTools();extraWire();
  $("#out").onclick=()=>{ls.del("code");gate()};
  document.querySelectorAll(".game").forEach(b=>b.onclick=()=>{
   const p=$("#pl").value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);if(p.length)P=p;turn=0;beep(600,.06);
@@ -358,13 +417,13 @@ tod(g){const d={t:sh(g.t),r:sh(g.r)};let last;
 cards(g){let d=sh(g.i);const S=P.map(()=>0);
  const n=()=>{if(!d.length)d=sh(g.i);const q=d.pop();
   scr(g.n,`<div class="turn">الدور على: ${esc(who())}</div><div class="panel q"><i>${g.e}</i><div>${q}</div></div>${g.sc?`<div class="two"><button class="btn" id="pt">✔ صح +1</button><button class="btn alt" id="nx">التالي</button></div><p class="count">${P.map((p,i)=>esc(p)+": "+S[i]).join(" | ")}</p>`:`<button class="btn" id="nx">التالي ➜</button>`}`);
-  $("#nx").onclick=()=>{turn++;n()};if(g.sc)$("#pt").onclick=()=>{S[turn%P.length]++;fx(40);vib(15);turn++;n()}};
+  $("#nx").onclick=()=>{turn++;n()};if(g.sc)$("#pt").onclick=()=>{S[turn%P.length]++;extraAward(who());fx(40);vib(15);turn++;n()}};
  n()},
 wheel(g){
  let rotation=0,spinning=false,spins=0;
  const modes={player:"لاعب",challenge:"تحدّي",penalty:"عقوبة"};
  const penalties=["قلّد صوت حيوان لمدة 10 ثوانٍ","غنّ مقطعًا قصيرًا","تحدّث بلهجة مختلفة لدقيقة","اذكر 5 أشياء في 10 ثوانٍ","مثّل فيلمًا دون كلام","قل نكتة تضحك المجموعة","اختر لاعبًا يتحداك","تحدث دون حرف الألف لمدة 20 ثانية"];
- const challenges=Array.isArray(g.i)&&g.i.length?g.i:["اذكر ثلاث مدن","قل معلومة غريبة","تحدّى لاعبًا في سرعة الإجابة"];
+ const challenges=Array.isArray(g.i)&&g.i.length?g.i.concat(EXTRA.custom):["اذكر ثلاث مدن","قل معلومة غريبة","تحدّى لاعبًا في سرعة الإجابة"];
  const palette=["#f6c76c","#7553b6","#e98d9b","#3f9d9b","#edb45e","#6941a4","#df7695","#377d9c"];
  let items=[],mode="player";
  const safeNames=()=>lammaPlayerList().slice(0,20);
