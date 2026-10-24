@@ -55,7 +55,43 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--acc);outline-of
 @keyframes flip{from{transform:rotateY(80deg) scale(.92);opacity:0}}
 @keyframes pulse{50%{transform:scale(1.14) rotate(-4deg)}}
 @media (prefers-reduced-motion:reduce){.q,.tick{animation:none}.wheel canvas{transition-duration:.01s}}
+
+/* Lamma UI refresh — responsive, accessible and touch friendly */
+:root{--radius:24px;--shadow:0 18px 50px rgba(8,7,30,.24)}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(700px 450px at 5% 5%,color-mix(in srgb,var(--bg2),transparent 25%),transparent),radial-gradient(550px 500px at 100% 90%,color-mix(in srgb,var(--acc),transparent 91%),transparent),linear-gradient(145deg,var(--bg),var(--bg2));background-attachment:fixed}
+.wrap{position:relative;padding-bottom:max(42px,env(safe-area-inset-bottom));}
+.logo{letter-spacing:-1.5px;text-shadow:0 7px 32px #0003;line-height:1.45}
+.sub{font-size:15px;max-width:440px;margin:0 auto 25px}
+.panel{border:1px solid color-mix(in srgb,var(--line),transparent 15%);box-shadow:var(--shadow);border-radius:var(--radius);backdrop-filter:blur(14px)}
+.btn{position:relative;overflow:hidden;box-shadow:0 7px 20px color-mix(in srgb,var(--acc),transparent 77%);border-radius:16px;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;letter-spacing:0}
+.btn:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 12px 24px color-mix(in srgb,var(--acc),transparent 67%)}
+.btn.alt{box-shadow:none}
+.btn.alt:hover{background:#ffffff14}
+input{outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc),transparent 80%)}
+.grid{gap:14px}
+.game{position:relative;overflow:hidden;min-height:164px;padding:19px;border:1px solid color-mix(in srgb,var(--line),transparent 24%);border-radius:22px!important;box-shadow:0 12px 28px #08051d20;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.game::after{content:"";position:absolute;width:100px;height:100px;left:-35px;top:-38px;border-radius:50%;background:color-mix(in srgb,var(--acc),transparent 89%);pointer-events:none}
+.game:hover{transform:translateY(-4px);box-shadow:0 18px 32px #08051d32;border-color:var(--acc)}
+.game span{display:flex;align-items:center;justify-content:center;width:53px;height:53px;margin-bottom:12px;border-radius:16px;background:color-mix(in srgb,var(--acc),transparent 82%);color:var(--bg)}
+.game span .lucide{width:28px;height:28px;stroke-width:2.1}
+.game b{font-family:Tajawal,Tahoma,sans-serif;font-weight:800;font-size:20px;line-height:1.5}
+.game small{margin-top:4px;font-size:13px}
+.top{gap:10px;flex-wrap:wrap}
+.link{border:1px solid #ffffff3b;border-radius:12px;padding:8px 14px;background:#ffffff0c}
+.badge{border:1px solid #ffffff29;padding:7px 13px;background:#ffffff15}
+.turn{background:#ffffff0e;border:1px solid #ffffff19;border-radius:16px;padding:8px 12px}
+.q{min-height:235px;gap:8px}
+.two>.btn{flex:1;min-width:0}
+.count{line-height:1.9}
+@media(max-width:380px){.wrap{padding-inline:12px}.grid{gap:9px}.game{padding:13px;min-height:153px}.game b{font-size:17px}.game small{font-size:12px}.panel{padding:17px}}
+@media(min-width:768px){.wrap{max-width:900px}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.game{min-height:184px}}
+@media(hover:none){.game:hover,.btn:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.game,.btn{transition:none}}
+
 </style>
+<script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="wrap" id="app"></div>
@@ -110,7 +146,8 @@ function home(){clr();
  app.innerHTML=`<div class="top"><button class="link" id="out">خروج</button><span class="badge">${dl?"باقي "+dl+" يوم":"اشتراك مفتوح"}</span></div>
  <div class="logo" style="font-size:42px;margin-top:6px">${PK.e} ${PK.t}</div><p class="sub">${PK.s}</p>
  <label class="hint" for="pl">أسماء اللاعبين (افصل بينها بفاصلة)</label><input id="pl" class="pl" value="${esc(P.join("، "))}">
- <div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span>${g.e}</span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
+ <div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
+ if(window.lucide)window.lucide.createIcons({attrs:{"stroke-width":2.1}});
  $("#out").onclick=()=>{ls.del("code");gate()};
  document.querySelectorAll(".game").forEach(b=>b.onclick=()=>{
   const p=$("#pl").value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);if(p.length)P=p;turn=0;beep(600,.06);
