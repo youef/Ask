@@ -231,9 +231,26 @@ input{min-height:55px}
 .lamma-tv .wrap{--content-max:1450px}.lamma-tv .game{min-height:175px}.lamma-tv .bomb-shell{max-width:1050px}.lamma-tv .wheel-advanced{max-width:1000px}.lamma-tv .wheel-advanced .wheel{width:min(65vh,520px)}
 @media(min-width:1000px){.lamma-tv .grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 @media(prefers-reduced-motion:no-preference){.game,.utility-btn,.btn{transition:transform .2s ease,box-shadow .2s ease}.game:active,.utility-btn:active,.btn:active{transform:scale(.97)}}
+
+/* Cinematic home and progression */
+.ev-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0}.ev-toolbar .utility-btn{justify-content:center;min-height:48px;text-align:center;white-space:normal}
+.ev-shop{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}.ev-theme{border:2px solid #e2d7e0;border-radius:17px;padding:12px;background:#fffaf3;color:#352439;cursor:pointer;display:flex;align-items:center;flex-direction:column;gap:5px}.ev-theme:disabled{opacity:.48;cursor:not-allowed}.ev-theme.active{border-color:#d7a03c;box-shadow:0 0 0 3px #e8b65e44}.ev-theme small{font-size:12px}.ev-swatch{width:100%;height:44px;border-radius:12px;background:linear-gradient(125deg,#292044,#a276e0)}.ev-swatch[data-swatch=gold]{background:linear-gradient(125deg,#382417,#ffcf73)}.ev-swatch[data-swatch=night]{background:linear-gradient(125deg,#07162a,#4c779d)}.ev-swatch[data-swatch=day]{background:linear-gradient(125deg,#dcecf1,#fdf1cb)}.ev-swatch[data-swatch=ocean]{background:linear-gradient(125deg,#04354e,#16b3ca)}.ev-swatch[data-swatch=rose]{background:linear-gradient(125deg,#542048,#eeb3cc)}.ev-swatch[data-swatch=emerald]{background:linear-gradient(125deg,#064b3b,#82dfac)}.ev-swatch[data-swatch=sunset]{background:linear-gradient(125deg,#3c2058,#fa9763)}
+.ev-setting{display:flex;align-items:center;justify-content:space-between;gap:10px}.ev-setting input{width:22px;height:22px}.extra-modal label{display:block;margin:12px 0 7px;font-weight:700}.ev-gift{width:90px;height:90px;border-radius:25px;margin:16px auto;background:linear-gradient(145deg,#ffe7ac,#cc9043);display:grid;place-items:center;color:#492f57;animation:evPop .55s cubic-bezier(.16,1.5,.5,1)}.ev-gift svg{width:48px;height:48px}
+@keyframes evPop{from{opacity:0;transform:scale(.45) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+:root[data-lamma-theme=ocean]{--bg:#07384c;--bg2:#0c647b;--acc:#8be5ee;--card:#eaf9fb;--ink:#183e48;--mute:#607b80;--line:#d0e5e7}
+:root[data-lamma-theme=rose]{--bg:#4d2346;--bg2:#863f71;--acc:#ffc3dd;--card:#fff0f6;--ink:#48213c;--mute:#896c82;--line:#edd6e4}
+:root[data-lamma-theme=emerald]{--bg:#064b3b;--bg2:#08735a;--acc:#b3f0ba;--card:#f0fff5;--ink:#164638;--mute:#628278;--line:#d5e9dd}
+:root[data-lamma-theme=sunset]{--bg:#412858;--bg2:#a75c6a;--acc:#ffd28a;--card:#fff5e9;--ink:#472c43;--mute:#887080;--line:#ecdcd6}
+.game{position:relative;overflow:hidden;transform:translateZ(0);border:1px solid #ffffff40!important;box-shadow:0 12px 0 #00000024,0 20px 30px #0004!important;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease!important}
+.game:before{content:"";position:absolute;inset:0;background:linear-gradient(145deg,#ffffff3b,transparent 45%,#00000012);pointer-events:none}
+@media(hover:hover){.game:hover{transform:translateY(-7px) rotateX(3deg);box-shadow:0 16px 0 #00000024,0 26px 42px #0005!important}}
+@keyframes evEnter{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+#app>.grid,#app>.panel,#app>.bomb-shell,#app>.wheel-advanced,#app>.extra-stage,#app>.logo{animation:evEnter .55s both}.lamma-overlay .lamma-modal{animation:evEnter .3s both}
+@media(max-width:480px){.ev-toolbar{grid-template-columns:1fr 1fr}.ev-toolbar .utility-btn:last-child{grid-column:span 2}}
+@media(prefers-reduced-motion:reduce){#app>.grid,#app>.panel,#app>.bomb-shell,#app>.wheel-advanced,#app>.extra-stage,#app>.logo,.lamma-overlay .lamma-modal,.ev-gift{animation:none!important}.game{transition:none!important}}
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-</head>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/lamma-icon.svg" type="image/svg+xml"><meta name="apple-mobile-web-app-title" content="لمّة"><meta name="mobile-web-app-capable" content="yes"></head>
 <body>
 <div class="wrap" id="app"></div>
 <script>
@@ -311,7 +328,7 @@ function lammaAppearance(){
  lammaClose();const el=document.createElement("div");el.className="lamma-overlay";
  el.innerHTML='<section class="lamma-modal" role="dialog" aria-modal="true" aria-label="المظهر"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><h2>مظهر اللمّة</h2><p>اختر اللون المناسب لجمعتكم</p><div class="lamma-theme-grid">'+[["royal","بنفسجي ملكي"],["gold","ذهبي فاخر"],["night","ليلي"],["day","نهاري"]].map(([k,v])=>'<button class="lamma-theme-choice" data-theme-choice="'+k+'">'+v+'</button>').join('')+'</div><button class="btn" id="theme-done">تم</button></section>';
  document.body.appendChild(el);el.querySelector(".lamma-close").onclick=lammaClose;el.querySelector("#theme-done").onclick=lammaClose;el.addEventListener("click",e=>{if(e.target===el)lammaClose()});
- el.querySelectorAll("[data-theme-choice]").forEach(b=>b.onclick=()=>{lammaState.theme=b.dataset.themeChoice;lammaSave();lammaApplyTheme();el.querySelectorAll("[data-theme-choice]").forEach(x=>x.classList.toggle("selected",x===b))});el.querySelector('[data-theme-choice="'+lammaState.theme+'"]')?.classList.add("selected");lammaIcons();
+ el.querySelectorAll("[data-theme-choice]").forEach(b=>b.onclick=()=>{lammaState.theme=b.dataset.themeChoice;EV.theme=lammaState.theme;evSave();lammaSave();lammaApplyTheme();el.querySelectorAll("[data-theme-choice]").forEach(x=>x.classList.toggle("selected",x===b))});el.querySelector('[data-theme-choice="'+lammaState.theme+'"]')?.classList.add("selected");lammaIcons();
 }
 function lammaRecordLoss(name){lammaState.losses[name]=(lammaState.losses[name]||0)+1;lammaState.rounds++;lammaSave()}
 function lammaDifficulty(){return lammaState.difficulty==="easy"?30:lammaState.difficulty==="medium"?20:lammaState.difficulty==="hard"?10:12+Math.floor(Math.random()*11)}
@@ -349,12 +366,12 @@ function extraEditor(){
 function extraSounds(){extraModal("مكتبة الأصوات",'<p>اختر نوع النغمة، أو عطّل الصوت من الإعدادات.</p>'+[["classic","كلاسيكي"],["arcade","أركيد"],["soft","هادئ"]].map(([id,n])=>'<button class="btn" data-sound="'+id+'">'+(EXTRA.sound===id?"✓ ":"")+n+'</button>').join(''),el=>el.querySelectorAll("[data-sound]").forEach(b=>b.onclick=()=>{EXTRA.sound=b.dataset.sound;extraSave();beep(740,.1);extraSounds()}))}
 function extraWho(){
  const names=extraNames();let index=0;
- const ask=()=>{const owner=names[index%names.length],q=extraQuestions[index%extraQuestions.length];scr("مين يعرف الثاني أكثر؟",'<div class="extra-stage"><h2>'+esc(q)+'</h2><p>صاحب السؤال: '+esc(owner)+' — اختر إجابتك سرًا، ثم مرّر الجهاز للآخرين.</p><div class="extra-choices">'+["أ","ب","ج"].map(x=>'<button class="btn" data-answer="'+x+'">الخيار '+x+'</button>').join('')+'</div><div id="extra-answers"></div></div>');document.querySelectorAll("[data-answer]").forEach(b=>b.onclick=()=>{const answer=b.dataset.answer;document.querySelectorAll("[data-answer]").forEach(x=>x.disabled=true);const others=names.filter(x=>x!==owner);$("#extra-answers").innerHTML='<p>ليتوقع كل لاعب الإجابة.</p>'+others.map((n,i)=>'<label class="extra-guess">'+esc(n)+'<select data-guess="'+i+'"><option value="">اختر</option><option>أ</option><option>ب</option><option>ج</option></select></label>').join('')+'<button class="btn" id="extra-reveal">كشف الإجابة</button>';$("#extra-reveal").onclick=()=>{let wins=[];document.querySelectorAll("[data-guess]").forEach(x=>{if(x.value===answer){const n=others[+x.dataset.guess];wins.push(n);extraAward(n)}});$("#extra-answers").innerHTML='<h2>الإجابة: '+answer+'</h2><p>'+(wins.length?"أصاب: "+wins.map(esc).join("، "):"لم يصب أحد")+'</p><button class="btn" id="extra-next">التالي</button>';fx(80);$("#extra-next").onclick=()=>{index++;ask()}}})};ask();
+ const ask=()=>{const owner=names[index%names.length],q=EV.category==="mixed"?extraQuestions[index%extraQuestions.length]:evChallenge();evRound();scr("مين يعرف الثاني أكثر؟",'<div class="extra-stage"><h2>'+esc(q)+'</h2><p>صاحب السؤال: '+esc(owner)+' — اختر إجابتك سرًا، ثم مرّر الجهاز للآخرين.</p><div class="extra-choices">'+["أ","ب","ج"].map(x=>'<button class="btn" data-answer="'+x+'">الخيار '+x+'</button>').join('')+'</div><div id="extra-answers"></div></div>');document.querySelectorAll("[data-answer]").forEach(b=>b.onclick=()=>{const answer=b.dataset.answer;document.querySelectorAll("[data-answer]").forEach(x=>x.disabled=true);const others=names.filter(x=>x!==owner);$("#extra-answers").innerHTML='<p>ليتوقع كل لاعب الإجابة.</p>'+others.map((n,i)=>'<label class="extra-guess">'+esc(n)+'<select data-guess="'+i+'"><option value="">اختر</option><option>أ</option><option>ب</option><option>ج</option></select></label>').join('')+'<button class="btn" id="extra-reveal">كشف الإجابة</button>';$("#extra-reveal").onclick=()=>{let wins=[];document.querySelectorAll("[data-guess]").forEach(x=>{if(x.value===answer){const n=others[+x.dataset.guess];wins.push(n);extraAward(n)}});$("#extra-answers").innerHTML='<h2>الإجابة: '+answer+'</h2><p>'+(wins.length?"أصاب: "+wins.map(esc).join("، "):"لم يصب أحد")+'</p><button class="btn" id="extra-next">التالي</button>';fx(80);$("#extra-next").onclick=()=>{index++;ask()}}})};ask();
 }
 function extraCharades(){
- const names=extraNames();let queue=sh(extraWords.concat(EXTRA.custom)),score=0,seconds=60,timer;
- scr("خمن الكلمة",'<div class="extra-stage"><h2>اشرح دون نطق الكلمة</h2><div class="extra-word" id="extra-word">جاهز؟</div><div class="extra-clock" id="extra-clock">60</div><p id="extra-score">النقاط: 0</p><div class="two"><button class="btn" id="extra-correct" disabled>صح +1</button><button class="btn alt" id="extra-skip" disabled>تخطي</button></div><button class="btn" id="extra-start">ابدأ</button></div>');
- const next=()=>{if(!queue.length)queue=sh(extraWords.concat(EXTRA.custom));$("#extra-word").textContent=queue.pop()};
+ const names=extraNames();let queue=sh(extraWords.concat(EXTRA.custom)),score=0,seconds=evTime(60),timer;evRound();
+ scr("خمن الكلمة",'<div class="extra-stage"><h2>اشرح دون نطق الكلمة</h2><div class="extra-word" id="extra-word">جاهز؟</div><div class="extra-clock" id="extra-clock">${seconds}</div><p id="extra-score">النقاط: 0</p><div class="two"><button class="btn" id="extra-correct" disabled>صح +1</button><button class="btn alt" id="extra-skip" disabled>تخطي</button></div><button class="btn" id="extra-start">ابدأ</button></div>');
+ const next=()=>{if(!queue.length)queue=sh(extraWords.concat(EXTRA.custom));$("#extra-word").textContent=EV.category==="mixed"?queue.pop():evChallenge()};
  $("#extra-start").onclick=()=>{$("#extra-start").disabled=true;$("#extra-correct").disabled=false;$("#extra-skip").disabled=false;next();timer=setInterval(()=>{seconds--;$("#extra-clock").textContent=seconds;if(seconds<=5&&seconds>0)beep(600,.04);if(seconds<=0){clearInterval(timer);$("#extra-word").textContent="انتهى الوقت";$("#extra-correct").disabled=true;$("#extra-skip").disabled=true;extraAward(who(),score);$("#extra-score").textContent=who()+" حصل على "+score+" نقطة";$("#extra-start").disabled=false;$("#extra-start").textContent="جولة جديدة";$("#extra-start").onclick=()=>{turn++;extraCharades()};fx(100)}},1000);TM.push(timer)};
  $("#extra-correct").onclick=()=>{score++;$("#extra-score").textContent="النقاط: "+score;beep(800,.08);next()};$("#extra-skip").onclick=next;
 }
@@ -370,6 +387,42 @@ try{if(localStorage.getItem("lamma:tv")==="1")document.body.classList.add("lamma
 function extraTools(){return '<div class="extra-tools"><button class="utility-btn" data-extra="session">'+lammaIcon("play-circle")+' وضع الحفلة</button><button class="utility-btn" data-extra="who">'+lammaIcon("heart-handshake")+' مين يعرف الثاني؟</button><button class="utility-btn" data-extra="charades">'+lammaIcon("message-circle-question")+' خمن الكلمة</button><button class="utility-btn" data-extra="profiles">'+lammaIcon("contact")+' اللاعبون</button><button class="utility-btn" data-extra="badges">'+lammaIcon("medal")+' الإنجازات</button><button class="utility-btn" data-extra="editor">'+lammaIcon("notebook-pen")+' تحدياتي</button><button class="utility-btn" data-extra="sounds">'+lammaIcon("music-2")+' الأصوات</button><button class="utility-btn" data-extra="tv">شاشة كبيرة</button></div>'}
 function extraWire(){document.querySelectorAll("[data-extra]").forEach(b=>b.onclick=()=>{const k=b.dataset.extra;if(k==="session")extraSession();else if(k==="who")extraWho();else if(k==="charades")extraCharades();else if(k==="profiles")extraProfiles();else if(k==="badges")extraBadges();else if(k==="editor")extraEditor();else if(k==="sounds")extraSounds();else if(k==="tv")extraTV()});lammaIcons()}
 
+
+/* Advanced game modes, theme shop and surprise cards */
+const EV_KEY="lamma:events:v1";
+const EV=(()=>{try{return Object.assign({killer:false,category:"mixed",level:"medium",round:0,theme:"royal",unlocked:["royal"]},JSON.parse(localStorage.getItem(EV_KEY)||"{}"))}catch(e){return {killer:false,category:"mixed",level:"medium",round:0,theme:"royal",unlocked:["royal"]}}})();
+function evSave(){try{localStorage.setItem(EV_KEY,JSON.stringify(EV))}catch(e){}}
+const evPacks={
+ family:["اذكر شيئًا تحبه في العائلة","قل أجمل ذكرى عائلية","اذكر ثلاث مناسبات سعيدة","صف شخصًا تحبه بكلمتين","اذكر خمس أكلات شعبية"],
+ friends:["اذكر ثلاثة مواقف مضحكة","اختر لاعبًا ليتحداك","من أكثر واحد يحب السفر؟","قل شيئًا لا يعرفه أصحابك عنك","تحدّ صديقك في ذكر خمس مدن"],
+ funny:["قلّد صوت روبوت","امشِ كأنك على القمر","تحدث كأنك مذيع","اختر لقبًا مضحكًا لنفسك","قل جملة بصوت كرتوني"],
+ thinking:["اذكر خمسة حيوانات","اذكر أربع دول عربية","قل كلمة تبدأ بآخر حرف من اسمك","اذكر ثلاثة اختراعات","اذكر خمسة أشياء لونها أحمر"]
+};
+const evModes={easy:"سهل",medium:"متوسط",hard:"صعب"};
+function evChallenge(){const keys=EV.category==="mixed"?Object.keys(evPacks):[EV.category];const pool=keys.flatMap(k=>evPacks[k]);const prefix=EV.level==="hard"?"خلال 5 ثوانٍ: ":EV.level==="medium"?"خلال 10 ثوانٍ: ":"";const all=pool.concat(EXTRA.custom||[]);return prefix+all[Math.floor(Math.random()*all.length)]}
+function evTime(base=30){return EV.killer?Math.max(5,base-Math.floor(EV.round/2)*3):base}
+function evRound(){EV.round++;evSave()}
+function evReward(){const names=extraNames();const n=names[Math.floor(Math.random()*names.length)];const prizes=[
+ ["gift","مكافأة! نقطة إضافية لـ "+n,()=>extraAward(n)],
+ ["shield","درع الحماية! اللاعب "+n+" يحصل على نقطة نجاة",()=>extraAward(n)],
+ ["shuffle","مفاجأة! تبديل الدور",()=>{turn=(turn+1)%names.length}],
+ ["sparkles","تحدّي مفاجئ: "+evChallenge(),()=>{}],
+ ["timer","مفاجأة: تحدٍّ سريع للجميع!",()=>{}],
+ ["star","هدية الحظ: نقطتان لـ "+n,()=>extraAward(n,2)]
+ ];const [icon,label,action]=prizes[Math.floor(Math.random()*prizes.length)];action();evRound();extraModal("صندوق المفاجآت",'<div class="ev-gift">'+lammaIcon(icon)+'</div><h3>'+esc(label)+'</h3><p>المفاجآت مرحة ولا تتضمن عقوبات مؤذية.</p><button class="btn" id="ev-gift-done">ممتاز!</button>',el=>{el.querySelector("#ev-gift-done").onclick=lammaClose;fx(100);beep(860,.16)})}
+const evThemeList=[["royal","ملكي","0"],["gold","ذهبي","2"],["night","ليلي","4"],["day","نهاري","6"],["ocean","محيطي","10"],["rose","وردي","15"],["emerald","زمردي","20"],["sunset","غروب","30"]];
+function evThemeShop(){
+ const total=Object.values(lammaState.scores).reduce((a,b)=>a+(Number(b)||0),0);
+ extraModal("متجر الثيمات المجاني",'<p>اجمع النقاط من الألعاب لفتح ثيمات دائمة، دون شراء.</p><div class="ev-shop">'+evThemeList.map(([id,name,needed])=>{const open=total>=+needed||EV.unlocked.includes(id);return '<button class="ev-theme '+(EV.theme===id?"active":"")+'" data-ev-theme="'+id+'" '+(!open?"disabled":"")+'><span class="ev-swatch" data-swatch="'+id+'"></span><strong>'+name+'</strong><small>'+(open?"متاح":needed+" نقطة لفتحه")+'</small></button>'}).join('')+'</div><p>مجموع نقاط البطولة: '+total+'</p>',el=>el.querySelectorAll("[data-ev-theme]").forEach(b=>b.onclick=()=>{EV.theme=b.dataset.evTheme;if(!EV.unlocked.includes(EV.theme))EV.unlocked.push(EV.theme);evSave();evApplyTheme();evThemeShop()}));
+}
+function evApplyTheme(){document.documentElement.dataset.lammaTheme=EV.theme}
+function evSettings(){
+ extraModal("أنماط التحديات",'<label class="ev-setting"><span>وضع الوقت القاتل</span><input type="checkbox" id="ev-killer" '+(EV.killer?"checked":"")+'></label><p>تقل مدة الجولات تدريجيًا حتى 5 ثوانٍ.</p><label>نوع الجلسة</label><select id="ev-category"><option value="mixed">متنوعة</option><option value="family">عائلية</option><option value="friends">أصدقاء</option><option value="funny">ضحك</option><option value="thinking">تفكير سريع</option></select><label>مستوى الصعوبة</label><select id="ev-level"><option value="easy">سهل</option><option value="medium">متوسط</option><option value="hard">صعب</option></select><button class="btn" id="ev-save">حفظ الإعدادات</button>',el=>{el.querySelector("#ev-category").value=EV.category;el.querySelector("#ev-level").value=EV.level;el.querySelector("#ev-save").onclick=()=>{EV.killer=el.querySelector("#ev-killer").checked;EV.category=el.querySelector("#ev-category").value;EV.level=el.querySelector("#ev-level").value;evSave();lammaClose()}})
+}
+function evTools(){return '<div class="ev-toolbar"><button class="utility-btn" data-ev="settings">'+lammaIcon("sliders-horizontal")+' أنماط التحديات</button><button class="utility-btn" data-ev="surprise">'+lammaIcon("gift")+' صندوق المفاجآت</button><button class="utility-btn" data-ev="shop">'+lammaIcon("palette")+' متجر الثيمات</button></div>'}
+function evWire(){document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>{if(b.dataset.ev==="settings")evSettings();if(b.dataset.ev==="surprise")evReward();if(b.dataset.ev==="shop")evThemeShop()});lammaIcons()}
+evApplyTheme();
+
 const $=s=>document.querySelector(s),app=$("#app");
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -381,7 +434,7 @@ const acc=()=>getComputedStyle(document.documentElement).getPropertyValue("--acc
 const fx=(n=120)=>{if(!lammaPrefs.celebration)return;window.confetti&&confetti({particleCount:n,spread:90,origin:{y:.65},colors:[acc(),"#ffffff","#ff6b9d","#6bd3ff"]})};
 const vib=p=>{if(!lammaPrefs.vibration)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 const beep=(f,d=.08)=>{if(!lammaPrefs.sound)return;f=EXTRA.sound==="arcade"?f*1.3:EXTRA.sound==="soft"?f*.7:f;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
-const scr=(t,b)=>{clr();app.innerHTML=`<div class="top"><button class="link" id="bk">‹ رجوع</button><h2>${t}</h2>${lammaTools()}</div>${lammaGameTools()}${extraTools()}${b}`;$("#bk").onclick=home;lammaWireTools();lammaWireGameTools();extraWire()};
+const scr=(t,b)=>{clr();app.innerHTML=`<div class="top"><button class="link" id="bk">‹ رجوع</button><h2>${t}</h2>${lammaTools()}</div>${lammaGameTools()}${extraTools()}${evTools()}${b}`;$("#bk").onclick=home;lammaWireTools();lammaWireGameTools();extraWire();evWire()};
 
 function gate(msg){clr();document.documentElement.removeAttribute("style");
  app.innerHTML=`<div class="welcome-hero"><div class="welcome-mark"><i data-lucide="sparkles" aria-hidden="true"></i></div><div class="welcome-kicker">ألعاب تجمعنا</div><div class="logo">لمّة</div><p class="sub">الضحكة أحلى مع اللمّة — جهّز أصحابك وابدأ التحدي</p><div class="welcome-pills"><span><i data-lucide="users-round"></i> جمعة الأصحاب</span><span><i data-lucide="party-popper"></i> تحديات ممتعة</span></div></div>
@@ -406,8 +459,8 @@ function home(){clr();
  app.innerHTML=`<div class="top"><button class="link" id="out">خروج</button><span class="badge">${dl?"باقي "+dl+" يوم":"اشتراك مفتوح"}</span>${lammaTools()}</div>
  <div class="logo" style="font-size:42px;margin-top:6px">${PK.e} ${PK.t}</div><p class="sub">${PK.s}</p>
  <label class="hint" for="pl">أسماء اللاعبين (افصل بينها بفاصلة)</label><input id="pl" class="pl" value="${esc(P.join("، "))}">
- ${lammaGameTools()}${extraTools()}<div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
- lammaWireTools();lammaWireGameTools();extraWire();
+ ${lammaGameTools()}${extraTools()}${evTools()}<div class="grid">${PK.g.map((g,i)=>`<button class="game" data-i="${i}"><span><i data-lucide="${({tod:"messages-square",cards:"layers-3",wheel:"disc-3",bomb:"bomb",timer:"timer"})[g.k]||"gamepad-2"}" aria-hidden="true"></i></span><b>${g.n}</b><small>${g.d}</small></button>`).join("")}</div>`;
+ lammaWireTools();lammaWireGameTools();extraWire();evWire();
  $("#out").onclick=()=>{ls.del("code");gate()};
  document.querySelectorAll(".game").forEach(b=>b.onclick=()=>{
   const p=$("#pl").value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);if(p.length)P=p;turn=0;beep(600,.06);
@@ -416,12 +469,12 @@ function home(){clr();
 const RUN={
 tod(g){const d={t:sh(g.t),r:sh(g.r)};let last;
  const v=()=>{scr(g.n,`<div class="turn">الدور على: ${esc(who())}</div><div class="panel q"><i>🤍</i><div>اختر: صراحة أم جرأة؟</div></div><div class="two"><button class="btn" id="t">صراحة 💬</button><button class="btn" id="d">جرأة 🔥</button></div>`);$("#t").onclick=()=>c("t");$("#d").onclick=()=>c("r")};
- const c=k=>{last=k;if(!d[k].length)d[k]=sh(g[k]);const q=d[k].pop();vib(20);
+ const c=k=>{last=k;if(!d[k].length)d[k]=sh(g[k]);const q=EV.category==="mixed"?d[k].pop():evChallenge();evRound();vib(20);
   scr(g.n,`<div class="turn">${esc(who())}</div><div class="panel q"><span class="tag">${k=="t"?"صراحة":"جرأة"}</span><i>${k=="t"?"💬":"🔥"}</i><div>${q}</div></div><div class="two"><button class="btn" id="ok">تم 🎉</button><button class="btn alt" id="sk">بطاقة أخرى</button></div>`);
   $("#ok").onclick=()=>{fx(70);turn++;v()};$("#sk").onclick=()=>c(last)};
  v()},
 cards(g){let d=sh(g.i);const S=P.map(()=>0);
- const n=()=>{if(!d.length)d=sh(g.i);const q=d.pop();
+ const n=()=>{if(!d.length)d=sh(g.i);const q=EV.category==="mixed"?d.pop():evChallenge();evRound();
   scr(g.n,`<div class="turn">الدور على: ${esc(who())}</div><div class="panel q"><i>${g.e}</i><div>${q}</div></div>${g.sc?`<div class="two"><button class="btn" id="pt">✔ صح +1</button><button class="btn alt" id="nx">التالي</button></div><p class="count">${P.map((p,i)=>esc(p)+": "+S[i]).join(" | ")}</p>`:`<button class="btn" id="nx">التالي ➜</button>`}`);
   $("#nx").onclick=()=>{turn++;n()};if(g.sc)$("#pt").onclick=()=>{S[turn%P.length]++;extraAward(who());fx(40);vib(15);turn++;n()}};
  n()},
@@ -477,7 +530,7 @@ bomb(g){
  let running=false,done=false,end=0,seconds=0,round=0,interval=null,shield=false,reverse=false;
  const challenges=Array.isArray(g.i)&&g.i.length?g.i:["اذكر ثلاثة أشياء تحبها","قل اسم مدينة تبدأ بحرف م","اذكر خمسة ألوان"];
  let queue=sh(challenges);
- const nextChallenge=()=>{if(!queue.length)queue=sh(challenges);return queue.pop()};
+ const nextChallenge=()=>{if(EV.category!=="mixed")return evChallenge();if(!queue.length)queue=sh(challenges);return queue.pop()};
  const art='<div class="bomb-art" id="bomb-art" aria-hidden="true"><div class="bomb-spark"></div><div class="bomb-fuse"></div><div class="bomb-body"><i data-lucide="bomb"></i><span class="bomb-glint"></span></div></div>';
  const render=()=>{
   scr(g.n,`<div class="bomb-shell"><div class="turn" id="tn">القنبلة المؤقتة · تحدّي السرعة</div><div class="bomb-stage" id="bomb-stage">${art}<div class="bomb-status" id="bomb-status">جاهزين للتحدّي؟</div><div class="bomb-count" id="bomb-count">؟</div><div class="bomb-meter"><span id="bomb-meter"></span></div><p class="bomb-help" id="bomb-help">أجب عن التحدّي ومرّر الجهاز قبل الانفجار!</p></div><div class="bomb-challenge" id="bomb-challenge"><span>التحدّي</span><strong id="bomb-question">اضغط ابدأ لكشف أول تحدّي</strong></div><div class="bomb-difficulty"><label for="bomb-level">مستوى القنبلة</label><select id="bomb-level"><option value="random">مفاجأة عشوائية</option><option value="easy">سهل · 30 ثانية</option><option value="medium">متوسط · 20 ثانية</option><option value="hard">صعب · 10 ثوانٍ</option></select></div><div class="bomb-powers"><button class="utility-btn" id="bomb-shield">درع النجاة</button><button class="utility-btn" id="bomb-bonus">+5 ثوانٍ</button><button class="utility-btn" id="bomb-reverse">عكس الاتجاه</button><button class="utility-btn" id="bomb-double">تحدّي مزدوج</button></div><div class="bomb-controls"><button class="btn" id="st">ابدأ الجولة</button><button class="btn alt" id="bomb-skip" disabled>تحدّي آخر</button></div><div class="bomb-stats" id="bomb-stats">الجولة ${round+1} · المدة عشوائية · من 12 إلى 22 ثانية</div></div>`);
@@ -510,7 +563,7 @@ bomb(g){
  };
  const action=()=>{
   if(!running){
-   running=true;done=false;shield=false;reverse=false;seconds=lammaDifficulty();end=performance.now()+seconds*1000;
+   running=true;done=false;shield=false;reverse=false;seconds=evTime(lammaDifficulty());evRound();end=performance.now()+seconds*1000;
    $("#bomb-stage").classList.remove("bomb-exploded","bomb-danger");
    $("#bomb-status").textContent="القنبلة تعمل!";
    $("#bomb-question").textContent=nextChallenge();
@@ -541,5 +594,5 @@ timer(g){let d=sh(g.i);
 };
 (async()=>{const c=ls.get("code");if(c){const r=await unlock(c);if(r.pkg)return enter(r,true)}gate()})();
 </script>
-</body>
+<script>if("serviceWorker" in navigator&&location.protocol==="https:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script></body>
 </html>
