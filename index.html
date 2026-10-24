@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d1b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>لمّة – ألعاب</title>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
@@ -112,6 +115,31 @@ input:focus{border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(-
 .welcome-panel .btn svg{width:20px;height:20px}
 .welcome-panel .err{font-size:13px}
 @media(min-width:768px){.welcome-hero{max-width:600px;margin-top:25px}}
+
+/* Lamma adaptive layout v3: iPhone, iPad, landscape, desktop */
+:root{color-scheme:dark;--content-max:1180px}
+html,body{width:100%;min-height:100%;overflow-x:clip}
+body{min-height:100svh;background-color:var(--bg);background-image:radial-gradient(ellipse 75% 55% at 95% 0%,color-mix(in srgb,var(--acc),transparent 89%),transparent),radial-gradient(ellipse 65% 70% at 0% 100%,color-mix(in srgb,var(--bg2),transparent 15%),transparent),linear-gradient(155deg,var(--bg),var(--bg2))}
+.wrap{width:min(100%,var(--content-max));max-width:var(--content-max);margin-inline:auto;padding:clamp(16px,2.5vw,36px);padding-top:max(clamp(16px,2.5vw,36px),env(safe-area-inset-top));padding-bottom:max(40px,env(safe-area-inset-bottom))}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.8vw,20px)}
+.game{min-width:0;min-height:clamp(158px,18vw,205px);padding:clamp(15px,2vw,24px);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start}
+.game span{flex-shrink:0}.game b,.game small{overflow-wrap:anywhere}
+.top{margin-bottom:clamp(14px,2vw,25px)}
+.panel{width:100%}
+.q{min-height:clamp(220px,30vh,390px);padding:clamp(18px,3vw,42px);font-size:clamp(20px,2.6vw,34px)}
+.btn{min-height:54px}
+input{min-height:55px}
+.welcome-hero{max-width:none;width:100%;margin:0 auto 18px}
+.welcome-panel{width:100%;max-width:520px}
+.welcome-hero .logo{font-size:clamp(76px,10vw,128px)}
+.welcome-hero .sub{max-width:480px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.game{min-height:190px}.welcome-hero{padding:38px 28px 30px}.welcome-panel{padding:32px}}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.game{min-height:205px}.welcome-hero{max-width:800px}.welcome-panel{max-width:540px}.logo{font-size:68px}}
+@media(orientation:landscape) and (max-height:650px){.wrap{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}.welcome-hero{padding:12px 18px;margin-bottom:10px}.welcome-mark{height:48px;width:48px;border-radius:16px;margin-bottom:5px}.welcome-mark svg{width:25px;height:25px}.welcome-hero .logo{font-size:clamp(44px,8vh,68px)}.welcome-hero .sub{margin-bottom:8px}.welcome-panel{padding:18px 24px}.panel-heading{margin-bottom:9px}.game{min-height:140px}.q{min-height:160px}}
+@media(min-width:700px) and (orientation:landscape) and (max-height:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:359px){.grid{gap:8px}.game{padding:12px;min-height:148px}.game b{font-size:16px}.welcome-panel{padding:17px}}
+@media(prefers-contrast:more){.game,.panel,.badge{border-width:2px}.sub,.hint,.game small{opacity:1}}
+
 </style>
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
