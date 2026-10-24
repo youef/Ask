@@ -245,7 +245,7 @@ function lammaSettings(){
 function lammaCelebrate(winner){
  lammaClose();
  const overlay=document.createElement("div");overlay.className="lamma-overlay";
- overlay.innerHTML='<section class="lamma-modal celebrate-modal" role="dialog" aria-modal="true" aria-label="شاشة الاحتفال"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><div class="celebrate-crown">'+lammaIcon("trophy")+'</div><h2>${winner?"مبروك "+esc(winner)+"!":"يا سلام عليكم!"}</h2><p>أجواء اللمّة تستاهل الاحتفال! 🎉</p><button class="btn" id="celebrate-again">'+lammaIcon("party-popper")+' احتفلوا مرة ثانية</button><button class="btn" id="celebrate-done" style="background:#eee4e0;color:#2b1a28">العودة للعبة</button></section>';
+ overlay.innerHTML='<section class="lamma-modal celebrate-modal" role="dialog" aria-modal="true" aria-label="شاشة الاحتفال"><button class="lamma-close" aria-label="إغلاق">'+lammaIcon("x")+'</button><div class="celebrate-crown">'+lammaIcon("trophy")+'</div><h2>'+ (winner?"مبروك "+esc(winner)+"!":"يا سلام عليكم!") +'</h2><p>أجواء اللمّة تستاهل الاحتفال! 🎉</p><button class="btn" id="celebrate-again">'+lammaIcon("party-popper")+' احتفلوا مرة ثانية</button><button class="btn" id="celebrate-done" style="background:#eee4e0;color:#2b1a28">العودة للعبة</button></section>';
  document.body.appendChild(overlay);overlay.querySelector(".lamma-close").onclick=lammaClose;overlay.querySelector("#celebrate-done").onclick=lammaClose;overlay.querySelector("#celebrate-again").onclick=lammaParty;
  overlay.addEventListener("click",e=>{if(e.target===overlay)lammaClose()});lammaIcons();lammaParty();
 }
